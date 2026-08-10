@@ -1,0 +1,3004 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CipherNexus v3 — Steganography &amp; Encryption Suite</title>
+
+    <!-- ═══════════════════════════════════════════════════════════
+     SECURITY META HEADERS
+     Move to HTTP response headers in production.
+     CSP: restricts scripts to self+unsafe-inline (inline handlers),
+     blocks all network connections (connect-src none),
+     disallows framing (frame-ancestors none — clickjacking).
+═══════════════════════════════════════════════════════════════ -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' 'unsafe-inline';
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               font-src https://fonts.gstatic.com;
+               img-src 'self' data: blob:;
+               connect-src 'none';
+               object-src 'none';
+               base-uri 'self';
+               frame-ancestors 'none';"
+    />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="no-referrer" />
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&amp;family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Styles (no inline CSS — all in style.css) -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- Cursor -->
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- Three.js WebGL Background -->
+    <canvas id="sceneCanvas"></canvas>
+
+    <!-- ═══════════ LANDING PAGE ═══════════ -->
+    <div id="landing-page" class="landing-page">
+      <div class="landing-content">
+        <div class="landing-logo-wrap">
+          <svg class="landing-hex" viewBox="0 0 40 40" fill="none">
+            <polygon
+              points="20,2 36,11 36,29 20,38 4,29 4,11"
+              stroke="rgba(78,201,232,0.8)"
+              stroke-width="1.5"
+              fill="rgba(78,201,232,0.05)"
+              class="hex-glow"
+            />
+            <polygon
+              points="20,7 31,13.5 31,26.5 20,33 9,26.5 9,13.5"
+              stroke="rgba(245,166,35,0.6)"
+              stroke-width="1"
+              fill="none"
+              class="hex-inner"
+            />
+          </svg>
+          <div class="landing-emoji">🔐</div>
+        </div>
+        
+        <h1 class="landing-title glitch" data-text="CIPHERNEXUS">CIPHERNEXUS</h1>
+        <p class="landing-subtitle">Advanced Cryptography & Steganography Suite</p>
+
+        <div class="landing-terminal" id="landingTerminal">
+          <div class="term-header">
+            <span class="term-dot close"></span>
+            <span class="term-dot min"></span>
+            <span class="term-dot max"></span>
+            <span class="term-title">boot_sequence.sh</span>
+          </div>
+          <div class="term-body" id="bootTerminalOutput">
+            <!-- JS inserts boot lines here -->
+          </div>
+        </div>
+
+        <button class="landing-btn" onclick="enterApp()">
+          <span class="btn-text">INITIALIZE SYSTEM</span>
+          <div class="btn-glow"></div>
+        </button>
+      </div>
+    </div>
+
+    <div class="app-wrap app-hidden" id="mainAppWrap">
+      <!-- ═══════════ HEADER ═══════════ -->
+      <header>
+        <div class="logo-mark">
+          <div class="logo-icon-wrap">
+            <svg class="logo-hex" viewBox="0 0 40 40" fill="none">
+              <polygon
+                points="20,2 36,11 36,29 20,38 4,29 4,11"
+                stroke="rgba(245,166,35,0.5)"
+                stroke-width="1.5"
+                fill="none"
+              />
+              <polygon
+                points="20,7 31,13.5 31,26.5 20,33 9,26.5 9,13.5"
+                stroke="rgba(245,166,35,0.2)"
+                stroke-width="1"
+                fill="none"
+              />
+            </svg>
+            <span class="logo-inner">🔐</span>
+          </div>
+          <div>
+            <div class="logo-name">CipherNexus</div>
+            <div class="logo-tagline">Steganography & Encryption Suite</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="ver-badge">v3.0</div>
+          <div class="status-pill">
+            <div class="pulse-dot"></div>
+            System Online
+          </div>
+        </div>
+      </header>
+
+      <!-- Toggle -->
+      <button
+        class="sidebar-toggle"
+        id="sidebarToggle"
+        onclick="toggleSidebar()"
+        title="Toggle sidebar"
+      >
+        <span class="toggle-arrow">&#8249;</span>
+      </button>
+
+      <div class="app-body">
+        <!-- ═══════════ SIDEBAR ═══════════ -->
+        <aside class="sidebar" id="sidebar">
+          <div class="nav-section-label">Steganography</div>
+          <div class="nav-item active" onclick="switchTab('steg-demo', this)">
+            <span class="nav-icon">🖼️</span> Hide & Extract<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('steg-pentest', this)">
+            <span class="nav-icon">🔍</span> Steg Analysis<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('audio-steg', this)">
+            <span class="nav-icon">🎵</span> Audio Steganography<span
+              class="nav-dot"
+            ></span>
+          </div>
+
+          <div class="nav-section-label">Cryptography</div>
+          <div class="nav-item" onclick="switchTab('aes-lab', this)">
+            <span class="nav-icon">🔒</span> AES Lab<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('rsa-lab', this)">
+            <span class="nav-icon">🔑</span> RSA Lab<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('hash-lab', this)">
+            <span class="nav-icon">#️⃣</span> Hashing & Integrity<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('encoding-lab', this)">
+            <span class="nav-icon">🔄</span> Encoding Lab<span
+              class="nav-dot"
+            ></span>
+          </div>
+
+          <div class="nav-section-label">Disk Encryption</div>
+          <div class="nav-item" onclick="switchTab('disk-enc', this)">
+            <span class="nav-icon">💾</span> KDF & Entropy<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('disk-pentest', this)">
+            <span class="nav-icon">🗝️</span> Encryption Attacks<span
+              class="nav-dot"
+            ></span>
+          </div>
+          <div class="nav-item" onclick="switchTab('crack-lab', this)">
+            <span class="nav-icon">🚀</span> Crack Lab<span
+              class="nav-dot"
+            ></span>
+          </div>
+
+          <div class="nav-section-label">Reference</div>
+          <div class="nav-item" onclick="switchTab('theory', this)">
+            <span class="nav-icon">📖</span> Theory & Concepts<span
+              class="nav-dot"
+            ></span>
+          </div>
+
+          <div class="nav-section-label" style="color: var(--cyan);">Learning Mode</div>
+          <div class="nav-item" onclick="window.startMission(1)" style="color: var(--cyan);">
+            <span class="nav-icon">🎯</span> Mission 1: The Insider Threat
+          </div>
+          <div class="nav-item" onclick="window.startMission(2)" style="color: var(--cyan);">
+            <span class="nav-icon">🎯</span> Mission 2: ECB is Broken
+          </div>
+          <div class="nav-item" onclick="window.startMission(3)" style="color: var(--cyan);">
+            <span class="nav-icon">🎯</span> Mission 3: The Sonic Shadow
+          </div>
+        </aside>
+
+        <!-- ═══════════ CONTENT ═══════════ -->
+        <main class="content">
+          <!-- ════════ TAB 1: STEG DEMO ════════ -->
+          <div id="tab-steg-demo" class="tab-panel active">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 01 — Steganography</div>
+              <h1 class="page-title">Hide & <em>Extract</em></h1>
+              <p class="page-desc">
+                Multi-bit LSB steganography in-browser. Choose 1, 2, or 3 bits
+                per channel — triple the capacity, slight quality tradeoff.
+                Compare original vs stego side-by-side.
+              </p>
+            </div>
+
+            <div class="grid-2">
+              <!-- ENCODE -->
+              <div class="card glow-amber">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">⬇️</div>
+                  <div>
+                    <div class="card-title-text">Encode — Hide Message</div>
+                    <div class="card-subtitle">Multi-bit LSB into PNG</div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>LSB Depth (bits per channel)
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">LSB Depth</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> How much data is hidden in each pixel's color values. More depth = more room, but more visible changes.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> LSB embedding modifies the least important bits of pixel color channels. Higher depth increases payload capacity exponentially but introduces statistical and visual anomalies that forensic tools can detect.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Depth Explanation</button>
+                      </div>
+                    </span>
+                  </label>
+                  <div class="seg-ctrl" id="lsbDepthCtrl">
+                    <button
+                      class="seg-btn active"
+                      onclick="setLsbDepth(1, this)"
+                    >
+                      1-bit <span class="seg-badge">standard</span>
+                    </button>
+                    <button class="seg-btn" onclick="setLsbDepth(2, this)">
+                      2-bit <span class="seg-badge">2× cap</span>
+                    </button>
+                    <button class="seg-btn" onclick="setLsbDepth(3, this)">
+                      3-bit <span class="seg-badge">3× cap</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="upload-zone">
+                  <input
+                    type="file"
+                    id="encodeFile"
+                    accept="image/*"
+                    onchange="handleEncodeUpload(this)"
+                  />
+                  <span class="upload-emoji">🖼️</span>
+                  <div class="upload-label">Drop cover image here</div>
+                  <div class="upload-hint">PNG recommended · any size</div>
+                </div>
+
+                <div class="img-frame mt-12" id="encodePreview">
+                  <span class="placeholder">no image loaded</span>
+                </div>
+
+                <div class="field mt-16">
+                  <label>Secret Message</label>
+                  <textarea
+                    id="secretMsg"
+                    placeholder="Type the message to hide..."
+                    oninput="updateCapacity()"
+                  ></textarea>
+                </div>
+
+                <!-- Capacity bar -->
+                <div class="capacity-wrap">
+                  <div class="capacity-header">
+                    <span class="capacity-label">CAPACITY USED</span>
+                    <span
+                      class="capacity-value"
+                      id="capValue"
+                      style="color: var(--sage)"
+                      >—</span
+                    >
+                  </div>
+                  <div class="capacity-track">
+                    <div
+                      class="capacity-fill"
+                      id="capFill"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <div class="capacity-warning" id="capWarn">
+                    ⚠ Message exceeds image capacity — reduce message size or
+                    use a larger/deeper image.
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Passphrase (XOR key)
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">XOR Key</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> A secret password mixed with your message to scramble it before hiding.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> Performs a bitwise exclusive-OR (XOR) operation between the secret message and the passphrase. This encrypts the payload before it gets embedded, providing defense-in-depth if the steganography is detected.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      </div>
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    id="encodeKey"
+                    placeholder="Optional — XOR encrypts before hiding"
+                  />
+                </div>
+
+                <button
+                  class="btn btn-amber btn-full"
+                  onclick="encodeMessage()"
+                >
+                  ⬇&nbsp; Encode & Download
+                </button>
+                <div id="encodeOutput" class="terminal mt-16 hidden"></div>
+              </div>
+
+              <!-- DECODE -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">⬆️</div>
+                  <div>
+                    <div class="card-title-text">Decode — Extract Message</div>
+                    <div class="card-subtitle">Multi-bit LSB extraction</div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>LSB Depth (must match encode)</label>
+                  <div class="seg-ctrl" id="lsbDecodeCtrl">
+                    <button
+                      class="seg-btn active"
+                      onclick="setLsbDecodeDepth(1, this)"
+                    >
+                      1-bit
+                    </button>
+                    <button
+                      class="seg-btn"
+                      onclick="setLsbDecodeDepth(2, this)"
+                    >
+                      2-bit
+                    </button>
+                    <button
+                      class="seg-btn"
+                      onclick="setLsbDecodeDepth(3, this)"
+                    >
+                      3-bit
+                    </button>
+                  </div>
+                </div>
+
+                <div class="upload-zone">
+                  <input
+                    type="file"
+                    id="decodeFile"
+                    accept="image/*"
+                    onchange="handleDecodeUpload(this)"
+                  />
+                  <span class="upload-emoji">🔍</span>
+                  <div class="upload-label">Drop stego image here</div>
+                  <div class="upload-hint">
+                    The image containing hidden data
+                  </div>
+                </div>
+
+                <div class="img-frame mt-12" id="decodePreview">
+                  <span class="placeholder">no image loaded</span>
+                </div>
+
+                <div class="field mt-16">
+                  <label>Passphrase (if used during encode)</label>
+                  <input
+                    type="text"
+                    id="decodeKey"
+                    placeholder="Leave blank if none was used"
+                  />
+                </div>
+
+                <button class="btn btn-rose btn-full" onclick="decodeMessage()">
+                  ⬆&nbsp; Extract Hidden Message
+                </button>
+                <div id="decodeOutput" class="terminal mt-16 hidden"></div>
+              </div>
+            </div>
+
+            <!-- COMPARE VIEW -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">⚖️</div>
+                <div>
+                  <div class="card-title-text">
+                    Compare View — Original vs Stego
+                  </div>
+                  <div class="card-subtitle">
+                    Side-by-side pixel difference visualization
+                  </div>
+                </div>
+              </div>
+              <p class="card-desc">
+                Upload both images to see pixel-level differences amplified 10×.
+                Red pixels = modified LSBs.
+              </p>
+              <div class="grid-2">
+                <div>
+                  <div class="upload-zone upload-compact">
+                    <input
+                      type="file"
+                      id="compareOrigFile"
+                      accept="image/*"
+                      onchange="handleCompareUpload('orig', this)"
+                    />
+                    <div class="upload-label upload-label-sm">
+                      Original image
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="upload-zone upload-compact">
+                    <input
+                      type="file"
+                      id="compareStegFile"
+                      accept="image/*"
+                      onchange="handleCompareUpload('steg', this)"
+                    />
+                    <div class="upload-label upload-label-sm">Stego image</div>
+                  </div>
+                </div>
+              </div>
+              <div class="compare-wrap hidden" id="compareWrap">
+                <div>
+                  <div class="compare-label orig">▸ ORIGINAL</div>
+                  <div class="img-frame">
+                    <canvas id="compareOrigCanvas"></canvas>
+                  </div>
+                </div>
+                <div>
+                  <div class="compare-label steg">▸ STEGO (diff ×10)</div>
+                  <div class="img-frame diff-canvas-wrap">
+                    <canvas id="compareStegCanvas"></canvas>
+                    <div class="diff-badge" id="diffBadge">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BIT PLANES -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">👁️</div>
+                <div>
+                  <div class="card-title-text">Bit Plane Visualizer</div>
+                  <div class="card-subtitle">
+                    Hidden data shows as noise in LSB planes
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center" style="gap: 12px">
+                <div class="upload-zone" style="flex: 1; padding: 18px">
+                  <input
+                    type="file"
+                    id="bitplaneFile"
+                    accept="image/*"
+                    onchange="renderBitPlanes(this)"
+                  />
+                  <div class="upload-label upload-label-sm">
+                    Drop image to analyze
+                  </div>
+                </div>
+                <button class="btn btn-ghost" onclick="showBitPlaneDemo()">
+                  Load Demo
+                </button>
+              </div>
+              <div id="bitplaneGrid" class="bitplane-grid hidden"></div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 2: STEG PENTEST ════════ -->
+          <div id="tab-steg-pentest" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 02 — Steganalysis</div>
+              <h1 class="page-title">Finding the <em>Invisible</em></h1>
+              <p class="page-desc">
+                Statistical detection, chi-square analysis, RS analysis,
+                histogram forensics, sample pairs — the real tools forensic
+                analysts use to uncover hidden data.
+              </p>
+              
+              <div class="alert-ethical mt-12">
+                <strong>// WARNING: FORENSIC TOOLS ACTIVE</strong>
+                You are wielding enterprise-grade steganalysis frameworks. Scanning network assets, embedded CTF files, or personal imagery without explicit, written authorization transcends unauthorized access—it’s a federal violation. Stay in the sandbox. Stay legal.
+              </div>
+            </div>
+
+            <!-- Chi-Square -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-rose">📊</div>
+                <div>
+                  <div class="card-title-text" style="display: flex; align-items: center;">Chi-Square Statistical Test
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">Chi-Square Analysis</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> A math test that looks for unnatural patterns in image colors to spot hidden data.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> Detects LSB steganography by comparing observed vs. expected frequencies of pixel values. LSB embedding equalizes adjacent color frequencies, which spikes the Chi-Square anomaly metric.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="card-subtitle">
+                    LSB steg leaves a measurable statistical fingerprint
+                  </div>
+                </div>
+              </div>
+              <div class="formula">
+                χ² = Σ (observed − expected)² / expected<br />
+                <span class="comment"
+                  >// χ² ≈ 0 → equalized pairs → LSB modified. High χ² → natural
+                  → likely clean.</span
+                >
+              </div>
+              <div class="upload-zone mt-16 upload-compact-lg">
+                <input
+                  type="file"
+                  id="chiFile"
+                  accept="image/*"
+                  onchange="runChiSquare(this)"
+                />
+                <div class="upload-label upload-label-sm">
+                  Upload image for chi-square analysis
+                </div>
+              </div>
+              <div id="chiOutput" class="mt-16 hidden"></div>
+            </div>
+
+            <!-- RS Analysis -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-sage">📈</div>
+                <div>
+                  <div class="card-title-text" style="display: flex; align-items: center;">
+                    RS (Regular-Singular) Analysis
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">RS Analysis</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> Checks if chunks of pixels are unusually "messy" in a way that suggests data was hidden there.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> Classifies pixel groups based on their smoothness. LSB modification disrupts the natural ratio of regular to singular groups, causing positive and negative group counts to converge—a reliable signature of stego content.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="card-subtitle">
+                    Detects LSB modification via pixel group smoothness
+                  </div>
+                </div>
+              </div>
+              <div class="formula">
+                Groups classified as Regular (R), Singular (S), or Unusable
+                (U)<br />
+                <span class="comment"
+                  >// In a clean image: R+ ≠ R- and S+ ≠ S-. After LSB steg: R+
+                  ≈ R- — the telltale signature.</span
+                >
+              </div>
+              <div class="upload-zone mt-16 upload-compact-lg">
+                <input
+                  type="file"
+                  id="rsFile"
+                  accept="image/*"
+                  onchange="runRSAnalysis(this)"
+                />
+                <div class="upload-label upload-label-sm">
+                  Upload image for RS analysis
+                </div>
+              </div>
+              <div id="rsOutput" class="mt-16 hidden"></div>
+            </div>
+
+            <!-- Histogram Analysis -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">📉</div>
+                <div>
+                  <div class="card-title-text">Histogram Forensics</div>
+                  <div class="card-subtitle">
+                    Per-channel pixel frequency analysis with pair anomaly
+                    detection
+                  </div>
+                </div>
+              </div>
+              <p class="card-desc-sm">
+                LSB embedding equalizes adjacent pixel value pairs (2k, 2k+1).
+                This histogram reveals that fingerprint — compare natural vs
+                stego distributions.
+              </p>
+              <div
+                class="seg-ctrl"
+                id="histChannelCtrl"
+                style="margin-bottom: 12px"
+              >
+                <button
+                  class="seg-btn active"
+                  onclick="setHistogramChannel('all', this)"
+                >
+                  All
+                </button>
+                <button
+                  class="seg-btn channel-red"
+                  onclick="setHistogramChannel('r', this)"
+                >
+                  Red
+                </button>
+                <button
+                  class="seg-btn channel-green"
+                  onclick="setHistogramChannel('g', this)"
+                >
+                  Green
+                </button>
+                <button
+                  class="seg-btn channel-blue"
+                  onclick="setHistogramChannel('b', this)"
+                >
+                  Blue
+                </button>
+              </div>
+              <div class="upload-zone upload-compact">
+                <input
+                  type="file"
+                  id="histFile"
+                  accept="image/*"
+                  onchange="runHistogramAnalysis(this)"
+                />
+                <div class="upload-label upload-label-sm">
+                  Upload image for histogram analysis
+                </div>
+              </div>
+              <canvas
+                id="histCanvas"
+                width="520"
+                height="200"
+                style="
+                  width: 100%;
+                  margin-top: 14px;
+                  border-radius: 8px;
+                  background: rgba(0, 0, 0, 0.25);
+                "
+              ></canvas>
+              <div id="histStats" class="mt-16"></div>
+            </div>
+
+            <!-- Sample Pairs Analysis -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-lilac">🔗</div>
+                <div>
+                  <div class="card-title-text" style="display: flex; align-items: center;">Sample Pairs Analysis (SPA)
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">Sample Pairs</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> Looks at how often certain pairs of colors sit next to each other to figure out exactly how much data is hidden.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> Models the effects of LSB embedding by analyzing structural shifts in adjacent pixel value differences, accurately estimating the exact length of the embedded secret message.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="card-subtitle">
+                    Statistical embedding rate estimation via pair frequency
+                  </div>
+                </div>
+              </div>
+              <div class="formula">
+                Compare frequency of (2k, 2k+1) vs (2k+1, 2k+2) adjacent
+                pairs<br />
+                <span class="comment"
+                  >// LSB embedding shifts even-odd pair ratios — detectable at
+                  ~5% embedding rate.</span
+                >
+              </div>
+              <div class="upload-zone mt-16 upload-compact-lg">
+                <input
+                  type="file"
+                  id="spaFile"
+                  accept="image/*"
+                  onchange="runSPAAnalysis(this)"
+                />
+                <div class="upload-label upload-label-sm">
+                  Upload image for sample pairs analysis
+                </div>
+              </div>
+              <div id="spaOutput" class="mt-16 hidden"></div>
+            </div>
+
+            <!-- Tool Reference Header -->
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 18px;
+                font-weight: 800;
+                letter-spacing: -0.3px;
+                margin-bottom: 4px;
+              "
+            >
+              Pentesting Tool Reference
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--text2);
+                font-weight: 300;
+                margin-bottom: 20px;
+              "
+            >
+              Copy-ready commands for real-world steg detection — images, audio,
+              and network.
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🔎 StegSeek
+                  <span class="badge badge-rose">Wordlist Attack</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Ultra-fast steghide passphrase cracker with RockYou or custom
+                wordlists.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >stegseek image.jpg /usr/share/wordlists/rockyou.txt stegseek
+                  --crack image.jpg wordlist.txt -o output.txt</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🧪 Steghide <span class="badge badge-cyan">Extract</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Embed/extract in JPEG, BMP, WAV, AU. Always try blank passphrase
+                first in CTFs.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >steghide info image.jpg steghide extract -sf image.jpg -p
+                  ""</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  📐 zsteg <span class="badge badge-sage">PNG/BMP LSB</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Best first tool for CTF images. Auto-tests all channels and bit
+                planes.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >zsteg image.png zsteg -a image.png zsteg -E "b1,rgb,lsb,xy"
+                  image.png</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🧬 ExifTool <span class="badge badge-amber">Metadata</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Dump EXIF — data often sits in Comment, UserComment fields
+                unnoticed.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >exiftool image.jpg exiftool -all= image.jpg strings image.jpg
+                  | grep -i "flag\|secret"</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🔬 Binwalk
+                  <span class="badge badge-cyan">Embedded Files</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Scans for embedded file signatures appended after image EOF.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >binwalk image.jpg binwalk -e image.jpg binwalk --dd='.*'
+                  image.jpg</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🖼️ jsteg <span class="badge badge-lilac">JPEG DCT</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Hides data in JPEG DCT coefficients — invisible to pixel-level
+                analysis. Separate from LSB.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >jsteg reveal image.jpg output.txt jsteg hide cover.jpg
+                  secret.txt stego.jpg</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🎯 OutGuess <span class="badge badge-amber">JPEG Embed</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Preserves statistical properties during JPEG embedding — harder
+                to detect than steghide.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >outguess -r stego.jpg output.txt outguess -k "passphrase" -d
+                  secret.txt cover.jpg stego.jpg</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🗃️ Foremost <span class="badge badge-sage">File Carving</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Carves embedded files by header/footer signatures — recovers
+                ZIP, PDF, PNG, JPEG appended to images.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >foremost -i image.jpg -o output/ foremost -t zip,pdf,png -i
+                  suspicious.jpg -o carved/</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  📋 pngcheck
+                  <span class="badge badge-cyan">PNG Validation</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Validates PNG structure and inspects auxiliary chunks — hidden
+                data often in tEXt, iTXt, zTXt.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >pngcheck -v image.png pngcheck -7tc image.png python3 -c
+                  "import struct; f=open('image.png','rb').read();
+                  print([f[i:i+4] for i in range(0,len(f),4) if f[i:i+4] in
+                  [b'tEXt',b'iTXt',b'zTXt']])"</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🎵 StegSolve
+                  <span class="badge badge-rose">Bit Plane Browser</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Java-based GUI for browsing all bit planes, applying XOR/AND
+                filters between frames, and extracting channel data.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >java -jar StegSolve.jar # Use: Analyse → Data Extract →
+                  Select bit planes # Or: Analyse → Frame Browser → Step through
+                  bit planes</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🛡️ OpenStego <span class="badge badge-sage">Watermark</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                LSB embedding + digital watermarking with DWT. Supports
+                invisible watermarks for ownership verification.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >java -jar openstego.jar extract -sf stego.png -xf output.txt
+                  java -jar openstego.jar embed -mf secret.txt -cf cover.png -sf
+                  stego.png</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <!-- Audio Steg Section -->
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 18px;
+                font-weight: 800;
+                letter-spacing: -0.3px;
+                margin-bottom: 4px;
+                margin-top: 28px;
+              "
+            >
+              Audio Steganography
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--text2);
+                font-weight: 300;
+                margin-bottom: 20px;
+              "
+            >
+              Data hidden in WAV/MP3 spectrogram, LSB of audio samples, or phase
+              encoding.
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🎧 Sonic Visualiser
+                  <span class="badge badge-lilac">Spectrogram</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Open audio file → add spectrogram layer → zoom into
+                high-frequency range. Encoded images/text appear as visual
+                patterns.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  ># Open in Sonic Visualiser: # Layer → Add Spectrogram → look
+                  for hidden patterns # Or use sox: sox audio.wav -n spectrogram
+                  -o spectrogram.png sox audio.wav -n stat</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🔈 wav-steg / HiddenWave
+                  <span class="badge badge-cyan">Audio LSB</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                LSB encoding in WAV audio samples — same principle as image LSB
+                but in audio domain.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >python3 WavSteg.py -r -i stego.wav -o output.txt -n 1 python3
+                  HiddenWave.py -r -i stego.wav</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <!-- Network Steg Section -->
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 18px;
+                font-weight: 800;
+                letter-spacing: -0.3px;
+                margin-bottom: 4px;
+                margin-top: 28px;
+              "
+            >
+              Network Steganography
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--text2);
+                font-weight: 300;
+                margin-bottom: 20px;
+              "
+            >
+              Covert channels in protocol headers, timing, and unused fields.
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🌐 covert_tcp
+                  <span class="badge badge-rose">TCP Covert Channel</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Hides data in TCP sequence numbers or IP ID fields — bypasses
+                DLP and firewalls.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  ># Sender: ./covert_tcp -dest 192.168.1.10 -source 192.168.1.5
+                  -file secret.txt # Receiver: ./covert_tcp -dest 192.168.1.5
+                  -source 192.168.1.10 -server -file received.txt</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🕳️ iodine <span class="badge badge-amber">DNS Tunneling</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Tunnels IP traffic over DNS queries (TXT/NULL/CNAME) —
+                exfiltrates data through firewalls that allow DNS.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  ># Server (root required): iodined -c -f 10.0.0.1/24
+                  tunnel.yourdomain.com # Client: iodine -f -r
+                  tunnel.yourdomain.com # Detection: tshark -r capture.pcap -Y
+                  "dns" -T fields -e dns.qry.name | sort | uniq -c | sort
+                  -rn</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🧊 ptunnel <span class="badge badge-cyan">ICMP Tunnel</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Tunnels TCP connections over ICMP echo (ping) — most firewalls
+                allow ICMP outbound.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  ># Proxy (server side): ptunnel -x password # Client: ptunnel
+                  -p proxy_ip -lp 8000 -da target_ip -dp 22 -x password ssh -p
+                  8000 user@127.0.0.1</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-amber">✅</div>
+                <div>
+                  <div class="card-title-text">
+                    Steganalysis Workflow Checklist
+                  </div>
+                  <div class="card-subtitle">
+                    Run top-to-bottom for any suspicious image
+                  </div>
+                </div>
+              </div>
+              <div id="checklist"></div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB: HASH LAB ════════ -->
+          <!-- ════ AUDIO STEG LAB ════ -->
+          <div id="tab-audio-steg" class="tab-panel">
+            <div class="section-title">
+              <span class="section-badge">MODULE 01b</span>
+              <h2>Audio Steganography</h2>
+            </div>
+            <p style="color: var(--text2); margin-bottom: 24px; max-width: 800px; line-height: 1.6;">
+              Hide data inside WAV audio files using LSB (Least Significant Bit) manipulation. 
+              Visualize the acoustic anomalies (high-frequency noise) introduced by your hidden data using the live spectrogram.
+            </p>
+
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-cyan">🎙️</div>
+                  <div>
+                    <div class="card-title-text">Audio Carrier (WAV)</div>
+                    <div class="card-subtitle">
+                      Load an uncompressed audio file
+                    </div>
+                  </div>
+                </div>
+
+                <div class="upload-zone" style="margin-bottom: 20px;">
+                  <input
+                    type="file"
+                    id="audioFile"
+                    accept=".wav"
+                    onchange="window.handleAudioUpload(this)"
+                  />
+                  <div class="upload-icon">🎵</div>
+                  <div class="upload-text">Drop a .wav file here</div>
+                  <div class="upload-subtext" id="audioStatus">No audio loaded</div>
+                </div>
+
+                <div class="field">
+                  <label>Secret Message</label>
+                  <textarea
+                    id="audioMessageInput"
+                    placeholder="Type the secret message to embed..."
+                    style="height: 100px"
+                  ></textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                  <button class="btn btn-cyan btn-full" onclick="window.encodeAudioMessage()">
+                    Embed Data (Encode)
+                  </button>
+                  <button class="btn btn-rose btn-full" onclick="window.decodeAudioMessage()">
+                    Extract Data (Decode)
+                  </button>
+                </div>
+              </div>
+
+              <div class="card glow-amber">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">🎛️</div>
+                  <div>
+                    <div class="card-title-text" style="display: flex; align-items: center;">Spectrogram Forensics
+                      <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                        <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                        <div class="info-tooltip">
+                          <span class="tooltip-label">Audio Forensics</span>
+                          <div class="tooltip-simplified"><b>Simplified:</b> A visual map of sound. Hiding data makes the map look fuzzy at the top (high pitch).</div>
+                          <div class="tooltip-complete"><b>Complete:</b> Transforming time-domain audio to frequency-domain via FFT reveals the broadband high-frequency quantization noise introduced when replacing LSBs with pseudo-random encrypted payloads.</div>
+                          <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        </div>
+                      </span>
+                    </div>
+                    <div class="card-subtitle">
+                      Visualize LSB quantization noise
+                    </div>
+                  </div>
+                </div>
+
+                <div class="img-frame" style="height: 200px; margin-bottom: 20px; background: rgba(13,13,26,0.8); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                  <canvas id="audioCanvas" width="400" height="200" style="width: 100%; height: 100%; object-fit: fill;"></canvas>
+                  <div style="position: absolute; top: 10px; right: 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;">Frequency Range: 0 - 22kHz</div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                  <button class="btn btn-ghost btn-full" onclick="window.playAndVisualize()">
+                    ▶️ Play & Visualize
+                  </button>
+                  <button id="audioDownloadBtn" class="btn btn-primary btn-full" onclick="window.exportWAV()" disabled>
+                    💾 Download Stego-WAV
+                  </button>
+                </div>
+                
+                <div class="info-box sage" style="margin-top: auto;">
+                  <strong>Forensic Note:</strong> Browser-based audio formats like MP3 compress data by removing frequencies humans can't hear. This completely destroys LSB steganography! Therefore, this lab strictly outputs uncompressed WAV files.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="tab-hash-lab" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module — Hashing & Integrity</div>
+              <h1 class="page-title">Hashing & <em>Integrity</em></h1>
+              <p class="page-desc">
+                Real-time cryptographic hashing, avalanche effect visualization,
+                file integrity verification, and HMAC authentication — all
+                powered by the Web Crypto API.
+              </p>
+            </div>
+
+            <!-- Multi-Algorithm Hasher -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-sage">#️⃣</div>
+                <div>
+                  <div class="card-title-text">Multi-Algorithm Hasher</div>
+                  <div class="card-subtitle">
+                    SHA-1 · SHA-256 · SHA-384 · SHA-512 — live as you type
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Input Text</label>
+                <textarea
+                  id="hashInput"
+                  placeholder="Type anything to see real-time hashes…"
+                  oninput="hashRealtime()"
+                  style="height: 70px"
+                >
+CipherNexus v3</textarea
+                >
+              </div>
+              <div
+                id="hashStats"
+                style="
+                  font-family: &quot;DM Mono&quot;;
+                  font-size: 11px;
+                  color: var(--text3);
+                  margin-bottom: 12px;
+                "
+              ></div>
+              <div id="hashResults" class="hash-results-container"></div>
+            </div>
+
+            <!-- Avalanche Effect -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-amber">🌊</div>
+                <div>
+                  <div class="card-title-text">
+                    Avalanche Effect Demonstrator
+                  </div>
+                  <div class="card-subtitle">
+                    Change 1 bit → ~50% of hash bits should flip
+                  </div>
+                </div>
+              </div>
+              <p class="card-desc">
+                The avalanche effect means that any tiny change in input should
+                produce a drastically different hash. A good hash function flips
+                approximately 50% of output bits for a single-bit input change.
+              </p>
+              <div class="grid-2">
+                <div class="field">
+                  <label>Input A</label>
+                  <input
+                    type="text"
+                    id="avalInput1"
+                    value="CipherNexus"
+                    oninput="avalancheDemo()"
+                  />
+                </div>
+                <div class="field">
+                  <label>Input B</label>
+                  <input
+                    type="text"
+                    id="avalInput2"
+                    value="CipherNexuS"
+                    oninput="avalancheDemo()"
+                  />
+                </div>
+              </div>
+              <div style="margin-top: 12px">
+                <div class="mono-label-upper">SHA-256 of Input A</div>
+                <div id="avalHash1" class="hash-digest-display">—</div>
+              </div>
+              <div style="margin-top: 10px">
+                <div class="mono-label-upper">
+                  SHA-256 of Input B (diff highlighted)
+                </div>
+                <div
+                  id="avalDiff"
+                  class="hash-digest-display avalanche-diff"
+                ></div>
+              </div>
+              <div id="avalBitDiff" style="margin-top: 14px"></div>
+              <div id="avalStats" class="mono-stats"></div>
+            </div>
+
+            <!-- File Integrity -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">🔎</div>
+                <div>
+                  <div class="card-title-text">File Integrity Checker</div>
+                  <div class="card-subtitle">
+                    SHA-256 hash comparison of two files
+                  </div>
+                </div>
+              </div>
+              <p class="card-desc">
+                Upload two files and compare their SHA-256 hashes. Any
+                single-byte change produces a completely different digest.
+              </p>
+              <div class="grid-2">
+                <div>
+                  <div class="upload-zone upload-compact">
+                    <input
+                      type="file"
+                      id="integrityFileA"
+                      onchange="handleIntegrityFile1(this)"
+                    />
+                    <div class="upload-label upload-label-sm">
+                      Original File
+                    </div>
+                  </div>
+                  <div id="integrityFile1Name" class="hash-file-info"></div>
+                  <div id="integrityFile1Hash" class="hash-file-value"></div>
+                </div>
+                <div>
+                  <div class="upload-zone upload-compact">
+                    <input
+                      type="file"
+                      id="integrityFileB"
+                      onchange="handleIntegrityFile2(this)"
+                    />
+                    <div class="upload-label upload-label-sm">
+                      Received File
+                    </div>
+                  </div>
+                  <div id="integrityFile2Name" class="hash-file-info"></div>
+                  <div id="integrityFile2Hash" class="hash-file-value"></div>
+                </div>
+              </div>
+              <div id="integrityResult" style="margin-top: 16px"></div>
+
+              <!-- Verify Checksum -->
+              <div class="card-separator">
+                <div class="section-heading-sm">Verify Known Checksum</div>
+                <div class="field">
+                  <label>Paste known SHA-256 hash</label>
+                  <input
+                    type="text"
+                    id="checksumInput"
+                    placeholder="e.g. 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+                  />
+                </div>
+                <div class="upload-zone" style="padding: 14px">
+                  <input type="file" id="checksumFile" />
+                  <div class="upload-label upload-label-sm">
+                    Upload file to verify against hash
+                  </div>
+                </div>
+                <button
+                  class="btn btn-cyan btn-full mt-12"
+                  onclick="verifyChecksum()"
+                >
+                  🔍 Verify Integrity
+                </button>
+                <div id="checksumOutput" class="terminal mt-16 hidden"></div>
+              </div>
+            </div>
+
+            <!-- HMAC -->
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">🔏</div>
+                  <div>
+                    <div class="card-title-text">HMAC — Generate Tag</div>
+                    <div class="card-subtitle">
+                      HMAC-SHA-256 using Web Crypto API
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Message</label
+                  ><input
+                    type="text"
+                    id="hmacMessage"
+                    value="Transfer $500 to account 12345"
+                  />
+                </div>
+                <div class="field">
+                  <label>Secret Key</label
+                  ><input
+                    type="text"
+                    id="hmacKey"
+                    value="my-shared-secret-key"
+                  />
+                </div>
+                <button class="btn btn-rose btn-full" onclick="hmacGenerate()">
+                  🔏 Generate HMAC Tag
+                </button>
+                <div id="hmacOutput" class="terminal mt-16 hidden"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-sage">✓</div>
+                  <div>
+                    <div class="card-title-text">HMAC — Verify Tag</div>
+                    <div class="card-subtitle">Verify message authenticity</div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Message to Verify</label
+                  ><input
+                    type="text"
+                    id="hmacVerifyMessage"
+                    value="Transfer $500 to account 12345"
+                  />
+                </div>
+                <div class="field">
+                  <label>Secret Key</label
+                  ><input
+                    type="text"
+                    id="hmacVerifyKey"
+                    value="my-shared-secret-key"
+                  />
+                </div>
+                <div class="field">
+                  <label>HMAC Tag (hex)</label
+                  ><input
+                    type="text"
+                    id="hmacTagVerify"
+                    placeholder="Generate a tag first, or paste one…"
+                  />
+                </div>
+                <button
+                  class="btn btn-sage btn-full"
+                  onclick="hmacVerifyTag()"
+                  style="
+                    background: linear-gradient(135deg, var(--sage), #3ab888);
+                    color: #000;
+                  "
+                >
+                  ✓ Verify Tag
+                </button>
+                <div id="hmacVerifyOutput" class="terminal mt-16 hidden"></div>
+              </div>
+            </div>
+
+            <!-- Hash Comparison Table -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-amber">📊</div>
+                <div>
+                  <div class="card-title-text">Hash Algorithm Comparison</div>
+                  <div class="card-subtitle">
+                    Digest size, speed, security status, and use cases
+                  </div>
+                </div>
+              </div>
+              <table class="mode-compare">
+                <thead>
+                  <tr>
+                    <th>Algorithm</th>
+                    <th>Digest</th>
+                    <th>Block</th>
+                    <th>Status</th>
+                    <th>Use Case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>MD5</td>
+                    <td>128-bit</td>
+                    <td>512-bit</td>
+                    <td>⛔ Broken</td>
+                    <td>
+                      Legacy checksums only. Collision attacks trivial (< 1
+                      sec).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>SHA-1</td>
+                    <td>160-bit</td>
+                    <td>512-bit</td>
+                    <td>⚠ Deprecated</td>
+                    <td>
+                      Git commits (legacy). Google produced collision in 2017
+                      (SHAttered).
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>SHA-256</td>
+                    <td>256-bit</td>
+                    <td>512-bit</td>
+                    <td>✅ Current</td>
+                    <td>
+                      TLS certs, Bitcoin, file integrity. Gold standard
+                      general-purpose hash.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>SHA-384</td>
+                    <td>384-bit</td>
+                    <td>1024-bit</td>
+                    <td>✅ Current</td>
+                    <td>
+                      TLS 1.3, government systems (FIPS 180-4). Truncated
+                      SHA-512.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>SHA-512</td>
+                    <td>512-bit</td>
+                    <td>1024-bit</td>
+                    <td>✅ Current</td>
+                    <td>
+                      High-security applications. Faster than SHA-256 on 64-bit
+                      CPUs.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>SHA-3</td>
+                    <td>224–512</td>
+                    <td>Sponge</td>
+                    <td>✅ Current</td>
+                    <td>
+                      NIST standard (Keccak). Backup if SHA-2 family is ever
+                      broken.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>BLAKE2</td>
+                    <td>256-bit</td>
+                    <td>512-bit</td>
+                    <td>✅ Current</td>
+                    <td>
+                      Faster than SHA-256. Used in WireGuard, Argon2, many
+                      modern systems.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>BLAKE3</td>
+                    <td>256-bit</td>
+                    <td>64 B</td>
+                    <td>✅ Current</td>
+                    <td>
+                      Parallelizable, tree-hashing. ~5x faster than BLAKE2.
+                      Excellent for large files.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Hash Attack Theory -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-rose">⚡</div>
+                <div>
+                  <div class="card-title-text">Hash Attacks & Theory</div>
+                  <div class="card-subtitle">
+                    Birthday attacks, rainbow tables, salting, and cracking
+                    tools
+                  </div>
+                </div>
+              </div>
+
+              <div class="formula">
+                Birthday Attack: P(collision) ≈ 1 − e^(−n²/2H)<br />
+                For n-bit hash: ~2^(n/2) attempts needed for 50% collision
+                probability<br /><br />
+                SHA-256: ~2¹²⁸ attempts (practically impossible)<br />
+                MD5 (128-bit): ~2⁶⁴ attempts (feasible with GPUs)<br />
+                SHA-1 (160-bit): ~2⁸⁰ (broken — Google did it in 2017)<br /><br />
+                <span class="comment"
+                  >// Rainbow tables pre-compute hash→password mappings.<br />//
+                  Salt = random prefix added to password before hashing →
+                  defeats rainbow tables.<br />// HMAC = keyed hash → proves
+                  both integrity AND authenticity.</span
+                >
+              </div>
+
+              <div class="alert-learning mt-12">
+                <strong>The Economics of Hash Cracking</strong>
+                Notice how attackers use GPUs instead of CPUs for hash cracking (e.g., Hashcat vs John the Ripper). Hash functions involve simple, repetitive math that runs optimally on parallel shader cores. A modern GPU cluster can iterate billions of hashes per second.
+              </div>
+              
+              <div
+                style="
+                  font-family: &quot;Syne&quot;, sans-serif;
+                  font-size: 14px;
+                  font-weight: 700;
+                  margin: 20px 0 10px;
+                "
+              >
+                Hash Cracking Tool Reference
+              </div>
+
+              <div class="technique">
+                <div class="tech-header">
+                  <div class="tech-name">
+                    🗝️ Hashcat
+                    <span class="badge badge-rose">GPU Cracking</span>
+                  </div>
+                </div>
+                <div class="tech-desc">
+                  World's fastest GPU hash cracker. Supports 350+ hash types
+                  including SHA, MD5, bcrypt, NTLM.
+                </div>
+                <div class="cmd-block">
+                  <span class="cmd-text"
+                    >hashcat -m 0 hashes.txt rockyou.txt # MD5 hashcat -m 1400
+                    hashes.txt rockyou.txt # SHA-256 hashcat -m 1700 hashes.txt
+                    rockyou.txt # SHA-512 hashcat -m 3200 hashes.txt rockyou.txt
+                    # bcrypt hashcat -a 3 -m 0 hashes.txt ?a?a?a?a?a?a #
+                    Brute-force 6-char</span
+                  ><button class="copy-btn" onclick="copyCmd(this)">
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="technique">
+                <div class="tech-header">
+                  <div class="tech-name">
+                    🔓 John the Ripper
+                    <span class="badge badge-amber">CPU Cracking</span>
+                  </div>
+                </div>
+                <div class="tech-desc">
+                  Classic password cracker with auto-detect, wordlist rules, and
+                  incremental brute-force modes.
+                </div>
+                <div class="cmd-block">
+                  <span class="cmd-text"
+                    >john --wordlist=rockyou.txt hashes.txt john
+                    --format=raw-sha256 hashes.txt john --incremental hashes.txt
+                    john --show hashes.txt</span
+                  ><button class="copy-btn" onclick="copyCmd(this)">
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div class="technique">
+                <div class="tech-header">
+                  <div class="tech-name">
+                    🔍 hash-identifier
+                    <span class="badge badge-sage">Identify</span>
+                  </div>
+                </div>
+                <div class="tech-desc">
+                  Identifies unknown hash types from hex strings — try this
+                  first before cracking.
+                </div>
+                <div class="cmd-block">
+                  <span class="cmd-text"
+                    >hash-identifier hashid '5f4dcc3b5aa765d61d8327deb882cf99'
+                    python3 -c "import hashlib;
+                    print(hashlib.sha256(b'test').hexdigest())"</span
+                  ><button class="copy-btn" onclick="copyCmd(this)">
+                    Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- HMAC vs Hash Theory -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-lilac">📖</div>
+                <div>
+                  <div class="card-title-text">HMAC vs Plain Hash</div>
+                  <div class="card-subtitle">
+                    Why you need a key for authentication
+                  </div>
+                </div>
+              </div>
+              <div class="formula">
+                Hash: H(message) → digest<br />
+                HMAC: H(key ⊕ opad ‖ H(key ⊕ ipad ‖ message)) → digest<br /><br />
+                Hash proves: "data has not changed" (integrity)<br />
+                HMAC proves: "data has not changed AND came from someone with
+                the key" (integrity + authentication)<br /><br />
+                <span class="comment"
+                  >// Without a key, an attacker can modify the message AND
+                  recompute the hash.<br />// With HMAC, only someone who knows
+                  the secret key can produce a valid tag.<br />// Used in: JWT
+                  tokens, API authentication, TLS record layer, IPsec.</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB: ENCODING LAB ════════ -->
+          <div id="tab-encoding-lab" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 08 — Data Transformation</div>
+              <h1 class="page-title">Encoding <em>Lab</em></h1>
+              <p class="page-desc">
+                Live synchronization between Plaintext, Base64, URL Encoding, Hex, and Binary representations. Types update automatically as you type.
+              </p>
+            </div>
+
+            <div class="alert-learning">
+              <strong>Cryptography vs. Encoding</strong>
+              Encoding is not encryption! Cryptography relies on secret keys to protect data from unauthorized access. Encoding simply converts data into different universally readable formats (like Base64 for email transport or URL encoding for web requests). Never rely on encoding for secrecy.
+            </div>
+
+            <div class="card card-mb glow-amber">
+              <div class="card-header">
+                <div class="card-icon icon-amber">🔄</div>
+                <div>
+                  <div class="card-title-text">Live Encode & Decode Sync</div>
+                  <div class="card-subtitle">
+                    Type in any box to sync the others in real-time
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Plaintext</label>
+                  <textarea
+                  id="encPlain"
+                  placeholder="Type plaintext to encode..."
+                  oninput="handleSyncEncoding('encPlain')"
+                  style="height: 60px"
+                ></textarea>
+              </div>
+
+              <div class="grid-2 mt-16">
+                <!-- Base64 -->
+                <div class="field">
+                  <label>Base64 (Encode / Decode)</label>
+                  <textarea
+                    id="encBase64"
+                    class="terminal"
+                    placeholder="Type or paste Base64 to decode..."
+                    style="height: 60px"
+                    oninput="handleSyncEncoding('encBase64')"
+                  ></textarea>
+                </div>
+
+                <!-- URL Encode -->
+                <div class="field">
+                  <label>URL Percent-encoding (Encode / Decode)</label>
+                  <textarea
+                    id="encUrl"
+                    class="terminal"
+                    placeholder="Type or paste URL encoded data..."
+                    style="height: 60px"
+                    oninput="handleSyncEncoding('encUrl')"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="grid-2 mt-16">
+                <!-- Hex -->
+                <div class="field">
+                  <label>Hexadecimal (Encode / Decode)</label>
+                  <textarea
+                    id="encHex"
+                    class="terminal"
+                    placeholder="Type or paste Hex to decode..."
+                    style="height: 60px"
+                    oninput="handleSyncEncoding('encHex')"
+                  ></textarea>
+                </div>
+
+                <!-- Binary -->
+                <div class="field">
+                  <label>Binary (Encode / Decode)</label>
+                  <textarea
+                    id="encBin"
+                    class="terminal"
+                    placeholder="Type or paste Binary (0s and 1s)..."
+                    style="height: 60px"
+                    oninput="handleSyncEncoding('encBin')"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 3: AES LAB ════════ -->
+          <div id="tab-aes-lab" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 03 — Cryptography</div>
+              <h1 class="page-title">AES <em>Modes Lab</em></h1>
+              <p class="page-desc">
+                ECB, CBC, GCM — visualize how each mode chains blocks
+                differently. See why ECB leaks patterns and why IV randomization
+                matters.
+              </p>
+            </div>
+
+            <!-- Mode selector -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-amber">🔐</div>
+                <div>
+                  <div class="card-title-text">AES Mode Simulator</div>
+                  <div class="card-subtitle">
+                    Block-level animation + IV visualization
+                  </div>
+                </div>
+              </div>
+
+              <div class="aes-mode-tabs">
+                <button
+                  class="mode-tab active"
+                  onclick="setAESMode('ECB', this)"
+                >
+                  ECB
+                </button>
+                <button class="mode-tab" onclick="setAESMode('CBC', this)">
+                  CBC
+                </button>
+                <button class="mode-tab" onclick="setAESMode('CTR', this)">
+                  CTR
+                </button>
+                <button class="mode-tab" onclick="setAESMode('GCM', this)">
+                  GCM
+                </button>
+              </div>
+
+              <div class="iv-field" id="ivField">
+                <label class="field" style="margin-bottom: 0"
+                  ><span
+                    style="
+                      font-family: &quot;DM Mono&quot;;
+                      font-size: 11px;
+                      letter-spacing: 1.5px;
+                      text-transform: uppercase;
+                      color: var(--text2);
+                    "
+                    >Initialization Vector (IV / Nonce)</span
+                  >
+                  <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                    <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                    <div class="info-tooltip">
+                      <span class="tooltip-label">IV / Nonce</span>
+                      <div class="tooltip-simplified"><b>Simplified:</b> A random starting number so that encrypting the same message twice looks completely different both times.</div>
+                      <div class="tooltip-complete"><b>Complete:</b> A nonce injected into the first block of the cipher operation. Reusing an IV with the same key breaks semantic security, allowing attackers to XOR ciphertexts together to recover plaintexts.</div>
+                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                    </div>
+                  </span>
+                  </label
+                >
+                <input
+                  type="text"
+                  id="aesIV"
+                  value="a1b2c3d4e5f60718"
+                  placeholder="16-char hex IV"
+                  style="margin-top: 7px"
+                />
+                <div
+                  style="
+                    font-size: 12px;
+                    color: var(--text3);
+                    font-family: &quot;DM Mono&quot;;
+                    margin-top: 6px;
+                  "
+                >
+                  ⚡ IV must be unique per message. Reusing IV with same key =
+                  catastrophic.
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Plaintext (simulated disk sector)</label>
+                <textarea id="aesPlain">
+CONFIDENTIAL: Project Files — Access Restricted to Clearance Level 5</textarea
+                >
+              </div>
+
+              <div class="field">
+                <label>Passphrase</label>
+                <input type="text" id="aesPass" value="MySecretKey123!" />
+              </div>
+
+              <div class="flex">
+                <button
+                  class="btn btn-amber"
+                  style="flex: 1"
+                  onclick="runAES('encrypt')"
+                >
+                  🔒 Encrypt
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  style="flex: 1"
+                  onclick="runAES('decrypt')"
+                >
+                  🔓 Decrypt
+                </button>
+                <button class="btn btn-ghost" onclick="animateBlocks()">
+                  ▶ Animate
+                </button>
+              </div>
+
+              <div class="alert-learning mt-16" style="margin-bottom: 2px;">
+                <strong>Why is ECB Mode Broken?</strong>
+                Electronic Codebook (ECB) encrypts identical plaintext blocks into identical ciphertext blocks. Because it doesn't chain blocks or use an Initialization Vector (IV), structured data (like documents or images) leaves visible structural shadows in the ciphertext. Modern systems default to AES-GCM for both encryption and authentication.
+              </div>
+
+              <!-- Block visualization -->
+              <div style="margin-top: 18px">
+                <div
+                  style="
+                    font-family: &quot;DM Mono&quot;;
+                    font-size: 11px;
+                    letter-spacing: 2px;
+                    color: var(--text3);
+                    text-transform: uppercase;
+                    margin-bottom: 10px;
+                  "
+                >
+                  Block Pipeline Visualization
+                </div>
+                <div class="block-viz" id="blockViz"></div>
+              </div>
+
+              <div id="aesOutput" class="terminal mt-16"></div>
+            </div>
+
+            <!-- Mode comparison table -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">📊</div>
+                <div>
+                  <div class="card-title-text">AES Mode Comparison</div>
+                  <div class="card-subtitle">
+                    ECB vs CBC vs CTR vs GCM — when to use what
+                  </div>
+                </div>
+              </div>
+              <table class="mode-compare">
+                <thead>
+                  <tr>
+                    <th>Mode</th>
+                    <th>IV Needed</th>
+                    <th>Parallelizable</th>
+                    <th>Auth Tag</th>
+                    <th>Weakness / Use-case</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ECB</td>
+                    <td>No</td>
+                    <td>Yes</td>
+                    <td>No</td>
+                    <td>
+                      ⚠ Identical blocks → identical ciphertext. Leaks patterns.
+                      Never use for real data.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>CBC</td>
+                    <td>Yes (random)</td>
+                    <td>Decrypt only</td>
+                    <td>No</td>
+                    <td>
+                      Secure with random IV. LUKS default. Padding oracle
+                      vulnerable without MAC.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>CTR</td>
+                    <td>Yes (nonce)</td>
+                    <td>Full</td>
+                    <td>No</td>
+                    <td>
+                      Stream cipher mode. Fast, random access. IV reuse =
+                      catastrophic key recovery.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>GCM</td>
+                    <td>Yes (nonce)</td>
+                    <td>Full</td>
+                    <td>Yes (128-bit)</td>
+                    <td>
+                      ✅ Recommended. Provides encryption + authentication. TLS
+                      1.3 default.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- ECB Pattern Demo -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-rose">⚠️</div>
+                <div>
+                  <div class="card-title-text">ECB Pattern Leak Demo</div>
+                  <div class="card-subtitle">
+                    Why ECB is broken — identical plaintext blocks produce
+                    identical ciphertext
+                  </div>
+                </div>
+              </div>
+              <p class="card-desc">
+                Type a message with repeated content. ECB will produce repeated
+                ciphertext blocks — revealing structure. CBC won't.
+              </p>
+              <div class="field">
+                <label>Repeated plaintext</label>
+                <input
+                  type="text"
+                  id="ecbDemoPlain"
+                  value="ATTACKATDAWNATTACKATDAWN"
+                  oninput="runECBDemo()"
+                />
+              </div>
+              <div class="grid-2" style="gap: 12px">
+                <div>
+                  <div
+                    style="
+                      font-family: &quot;DM Mono&quot;;
+                      font-size: 10px;
+                      letter-spacing: 2px;
+                      color: var(--danger);
+                      margin-bottom: 8px;
+                    "
+                  >
+                    ECB — PATTERN VISIBLE
+                  </div>
+                  <div
+                    class="block-viz"
+                    id="ecbBlocks"
+                    style="min-height: 50px"
+                  ></div>
+                </div>
+                <div>
+                  <div
+                    style="
+                      font-family: &quot;DM Mono&quot;;
+                      font-size: 10px;
+                      letter-spacing: 2px;
+                      color: var(--sage);
+                      margin-bottom: 8px;
+                    "
+                  >
+                    CBC — RANDOMIZED
+                  </div>
+                  <div
+                    class="block-viz"
+                    id="cbcBlocks"
+                    style="min-height: 50px"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 4: RSA LAB ════════ -->
+          <div id="tab-rsa-lab" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">
+                Module 04 — Asymmetric Cryptography
+              </div>
+              <h1 class="page-title">RSA <em>Lab</em></h1>
+              <p class="page-desc">
+                Generate real RSA key pairs, encrypt/decrypt messages, sign and
+                verify — all in-browser. Visualize prime factorization and
+                understand why RSA works.
+              </p>
+            </div>
+
+            <!-- Key generation -->
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-lilac">🔑</div>
+                <div>
+                  <div class="card-title-text">RSA Key Generation</div>
+                  <div class="card-subtitle">
+                    Choose primes p & q — derive n, φ(n), e, d
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="field">
+                  <label>Prime p</label>
+                  <input
+                    type="number"
+                    id="rsaP"
+                    value="61"
+                    oninput="rsaDerive()"
+                  />
+                </div>
+                <div class="field">
+                  <label>Prime q</label>
+                  <input
+                    type="number"
+                    id="rsaQ"
+                    value="53"
+                    oninput="rsaDerive()"
+                  />
+                </div>
+              </div>
+
+              <div class="field">
+                <label>Public Exponent e (coprime with φ(n))
+                  <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                    <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                    <div class="info-tooltip">
+                      <span class="tooltip-label">Public Exponent</span>
+                      <div class="tooltip-simplified"><b>Simplified:</b> The number used to lock the message. It's usually 65537 because it's mathematically safe and fast.</div>
+                      <div class="tooltip-complete"><b>Complete:</b> In RSA, e must be coprime to φ(n). 65537 (2^16+1) is used almost universally because its binary representation enables extremely fast exponentiation while resisting small-exponent attacks.</div>
+                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                    </div>
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  id="rsaE"
+                  value="17"
+                  oninput="rsaDerive()"
+                />
+              </div>
+
+              <div style="margin-bottom: 16px">
+                <div
+                  style="
+                    font-family: &quot;DM Mono&quot;;
+                    font-size: 11px;
+                    letter-spacing: 1.5px;
+                    text-transform: uppercase;
+                    color: var(--text2);
+                    margin-bottom: 10px;
+                  "
+                >
+                  Derived Key Parameters
+                </div>
+                <div id="rsaParams" class="rsa-key-display">
+                  Choose p and q above to derive key parameters...
+                </div>
+              </div>
+
+              <div class="flex" style="flex-wrap: wrap; gap: 8px">
+                <button class="btn btn-lilac" onclick="rsaGenRandom()">
+                  🎲 Random Primes
+                </button>
+                <button class="btn btn-ghost" onclick="rsaCheckPrimes()">
+                  ✓ Verify Primes
+                </button>
+              </div>
+
+              <!-- Prime grid -->
+              <div style="margin-top: 16px">
+                <div
+                  style="
+                    font-family: &quot;DM Mono&quot;;
+                    font-size: 10px;
+                    letter-spacing: 2px;
+                    color: var(--text3);
+                    text-transform: uppercase;
+                    margin-bottom: 8px;
+                  "
+                >
+                  Prime Number Grid (2–100)
+                </div>
+                <div class="prime-grid" id="primeGrid"></div>
+              </div>
+            </div>
+
+            <!-- Encrypt / Decrypt -->
+            <div class="grid-2">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">📨</div>
+                  <div>
+                    <div class="card-title-text">RSA Encrypt</div>
+                    <div class="card-subtitle">
+                      Encrypt with public key (n, e)
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Plaintext (numeric — ASCII codes)</label>
+                  <input
+                    type="text"
+                    id="rsaPlainEnc"
+                    value="Hello"
+                    oninput="rsaAutoEncrypt()"
+                  />
+                </div>
+                <div style="margin-bottom: 12px">
+                  <div
+                    style="
+                      font-family: &quot;DM Mono&quot;;
+                      font-size: 10px;
+                      letter-spacing: 2px;
+                      color: var(--text3);
+                      text-transform: uppercase;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    Ciphertext Blocks
+                  </div>
+                  <div
+                    id="rsaCipherBlocks"
+                    class="block-viz"
+                    style="min-height: 44px; flex-wrap: wrap"
+                  ></div>
+                </div>
+                <div
+                  id="rsaEncOutput"
+                  class="rsa-key-display"
+                  style="color: var(--amber)"
+                >
+                  —
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">🔓</div>
+                  <div>
+                    <div class="card-title-text">RSA Decrypt</div>
+                    <div class="card-subtitle">
+                      Decrypt with private key (n, d)
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Ciphertext (comma-separated)</label>
+                  <input
+                    type="text"
+                    id="rsaCipherIn"
+                    placeholder="Paste ciphertext from encrypt..."
+                  />
+                </div>
+                <button class="btn btn-rose btn-full" onclick="rsaDecrypt()">
+                  🔓 Decrypt
+                </button>
+                <div
+                  id="rsaDecOutput"
+                  class="terminal mt-16"
+                  style="min-height: 60px"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Sign / Verify -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-sage">✍️</div>
+                <div>
+                  <div class="card-title-text">RSA Digital Signature</div>
+                  <div class="card-subtitle">
+                    Sign with private key → Verify with public key
+                  </div>
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <div class="field">
+                    <label>Message to Sign</label
+                    ><input
+                      type="text"
+                      id="rsaSignMsg"
+                      value="Authenticate: Karan"
+                    />
+                  </div>
+                  <button
+                    class="btn btn-sage btn-full"
+                    onclick="rsaSign()"
+                    style="
+                      background: linear-gradient(135deg, var(--sage), #3ab888);
+                      color: #000;
+                    "
+                  >
+                    ✍ Sign Message
+                  </button>
+                  <div
+                    id="rsaSigOutput"
+                    class="rsa-key-display mt-12"
+                    style="color: var(--sage)"
+                  >
+                    —
+                  </div>
+                </div>
+                <div>
+                  <div class="field">
+                    <label>Signature to Verify</label
+                    ><input
+                      type="text"
+                      id="rsaVerifyMsg"
+                      value="Authenticate: Karan"
+                    />
+                  </div>
+                  <button class="btn btn-ghost btn-full" onclick="rsaVerify()">
+                    ✓ Verify Signature
+                  </button>
+                  <div
+                    id="rsaVerifyOutput"
+                    class="terminal mt-12"
+                    style="min-height: 60px"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RSA Theory -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-lilac">📐</div>
+                <div>
+                  <div class="card-title-text">How RSA Works</div>
+                  <div class="card-subtitle">Mathematical foundation</div>
+                </div>
+              </div>
+              <div class="formula">
+                Key Generation:<br />
+                n = p × q (modulus — public)<br />
+                φ(n) = (p-1)(q-1) (Euler totient)<br />
+                e: 1 &lt; e &lt; φ(n), gcd(e,φ(n)) = 1 (public exponent)<br />
+                d = e⁻¹ mod φ(n) (private exponent — modular inverse)<br /><br />
+                Encrypt: C = Mᵉ mod n<br />
+                Decrypt: M = Cᵈ mod n<br />
+                Sign: S = Hᵈ mod n (H = hash of message)<br />
+                Verify: H = Sᵉ mod n (must match original hash)<br /><br />
+                <span class="comment"
+                  >// Security: factoring n into p,q is computationally
+                  infeasible for large n (2048+ bits)</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 5: DISK ENC ════════ -->
+          <div id="tab-disk-enc" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 05 — Disk Encryption</div>
+              <h1 class="page-title">KDF & <em>Entropy</em></h1>
+              <p class="page-desc">
+                PBKDF2 key derivation with live strength meters, Shannon entropy
+                histogram, and passphrase crack-time estimator.
+              </p>
+            </div>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <span class="stat-value">256</span
+                ><span class="stat-label">Bit Key Size</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">14</span
+                ><span class="stat-label">AES Rounds</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">128</span
+                ><span class="stat-label">Bit Block Size</span>
+              </div>
+            </div>
+
+            <div class="card card-mb">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">🧬</div>
+                <div>
+                  <div class="card-title-text" style="display: flex; align-items: center;">Key Derivation — PBKDF2
+                    <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
+                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <div class="info-tooltip">
+                        <span class="tooltip-label">PBKDF2</span>
+                        <div class="tooltip-simplified"><b>Simplified:</b> A recipe that purposefully slows down password checking to stop hackers from guessing millions of passwords a second.</div>
+                        <div class="tooltip-complete"><b>Complete:</b> Applies a pseudorandom function (HMAC) to the passphrase and salt, iterating hundreds of thousands of times. This "key stretching" penalizes brute-force attacks by making each guess computationally expensive.</div>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      </div>
+                    </span>
+                  </div>
+                  <div class="card-subtitle">
+                    How passwords become cryptographic keys
+                  </div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Passphrase</label
+                ><input
+                  type="text"
+                  id="kdfPass"
+                  value="password123"
+                  oninput="runKDF()"
+                />
+              </div>
+              <div class="field">
+                <label>Salt (hex)</label
+                ><input
+                  type="text"
+                  id="kdfSalt"
+                  value="a3f8b2c91e4d7605"
+                  oninput="runKDF()"
+                />
+              </div>
+              <div class="field">
+                <label>Iterations</label
+                ><input
+                  type="number"
+                  id="kdfIter"
+                  value="100000"
+                  min="1000"
+                  max="1000000"
+                  oninput="runKDF()"
+                />
+              </div>
+              <button class="btn btn-cyan btn-full" onclick="runKDF()">
+                ⚙ Derive Key
+              </button>
+              <div
+                id="kdfOutput"
+                class="terminal mt-16"
+                style="min-height: 80px"
+              ></div>
+              <div class="mt-16">
+                <div class="progress-field">
+                  <div class="progress-labels">
+                    <span>Password Entropy</span><span id="entropyPct">—</span>
+                  </div>
+                  <div class="progress-track">
+                    <div
+                      class="progress-fill"
+                      id="entropyBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-field">
+                  <div class="progress-labels">
+                    <span>Crack Resistance</span><span id="crackPct">—</span>
+                  </div>
+                  <div class="progress-track">
+                    <div
+                      class="progress-fill"
+                      id="crackBar"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon icon-sage">📈</div>
+                <div>
+                  <div class="card-title-text">Entropy Visualization</div>
+                  <div class="card-subtitle">
+                    Byte frequency — encrypted vs plaintext
+                  </div>
+                </div>
+              </div>
+              <div
+                class="flex"
+                style="align-items: flex-start; gap: 20px; flex-wrap: wrap"
+              >
+                <div style="flex: 1; min-width: 200px">
+                  <div class="field">
+                    <label>Input Data</label
+                    ><textarea id="entropyInput" style="height: 80px">
+The quick brown fox jumps over the lazy dog. 1234567890!</textarea
+                    >
+                  </div>
+                  <div class="flex">
+                    <button
+                      class="btn btn-ghost"
+                      style="flex: 1"
+                      onclick="calcEntropy('plain')"
+                    >
+                      Plaintext
+                    </button>
+                    <button
+                      class="btn btn-cyan"
+                      style="flex: 1"
+                      onclick="calcEntropy('encrypted')"
+                    >
+                      Encrypted
+                    </button>
+                  </div>
+                  <div
+                    id="entropyStats"
+                    class="terminal mt-12"
+                    style="min-height: 80px; max-height: 130px"
+                  ></div>
+                </div>
+                <div style="flex: 2; min-width: 280px">
+                  <canvas id="entropyCanvas" width="480" height="180"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-amber">⚡</div>
+                <div>
+                  <div class="card-title-text">
+                    Passphrase Strength Analyzer
+                  </div>
+                  <div class="card-subtitle">
+                    GPU crack-time estimation at 100B guesses/s
+                  </div>
+                </div>
+              </div>
+              <div class="field mt-16">
+                <label>Test Your Passphrase</label
+                ><input
+                  type="text"
+                  id="pwTest"
+                  placeholder="Type a passphrase..."
+                  oninput="analyzePW()"
+                />
+              </div>
+              <div id="pwResult"></div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 6: DISK PENTEST ════════ -->
+          <div id="tab-disk-pentest" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 06 — Encryption Attacks</div>
+              <h1 class="page-title">Breaking the <em>Vault</em></h1>
+              <p class="page-desc">
+                Cold boot, evil maid, passphrase cracking — how penetration
+                testers attack encrypted volumes and what defenses actually
+                work.
+              </p>
+              <div class="alert-ethical mt-12">
+                <strong>// RESTRICTED PROTOCOL: VAULT BREACHING</strong>
+                Demonstrating brute-force entropy exhaustion, memory dumping, or evil maid vectors against live disk infrastructure you do not own is strictly an adversarial action. Use these techniques exclusively within controlled, designated red-team environments.
+              </div>
+            </div>
+
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 16px;
+                font-weight: 700;
+                margin-bottom: 14px;
+                letter-spacing: -0.2px;
+              "
+            >
+              Attack Surface
+            </div>
+            <div class="attack-grid">
+              <div class="attack-item">
+                <div class="attack-emoji">🔑</div>
+                <div>
+                  <div class="attack-info-name">Weak Passphrase</div>
+                  <div class="attack-info-desc">
+                    Most common vector. GPU cracking at 100B guesses/sec
+                    trivializes short passwords.
+                  </div>
+                </div>
+              </div>
+              <div class="attack-item">
+                <div class="attack-emoji">🧊</div>
+                <div>
+                  <div class="attack-info-name">Cold Boot Attack</div>
+                  <div class="attack-info-desc">
+                    Keys persist in RAM 30s–minutes post-shutdown. Freeze + dump
+                    = key extraction.
+                  </div>
+                </div>
+              </div>
+              <div class="attack-item">
+                <div class="attack-emoji">👿</div>
+                <div>
+                  <div class="attack-info-name">Evil Maid Attack</div>
+                  <div class="attack-info-desc">
+                    Bootloader tampered while unattended. Keylogger captures
+                    passphrase next boot.
+                  </div>
+                </div>
+              </div>
+              <div class="attack-item">
+                <div class="attack-emoji">💾</div>
+                <div>
+                  <div class="attack-info-name">Hibernation Leak</div>
+                  <div class="attack-info-desc">
+                    hiberfil.sys / swap may contain decrypted key material in
+                    plaintext.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style="
+                font-family: &quot;Syne&quot;, sans-serif;
+                font-size: 18px;
+                font-weight: 800;
+                letter-spacing: -0.3px;
+                margin-bottom: 4px;
+              "
+            >
+              Attack Tool Reference
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--text2);
+                font-weight: 300;
+                margin-bottom: 20px;
+              "
+            >
+              Real commands for forensic labs and CTF challenges.
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🗝️ Hashcat
+                  <span class="badge badge-rose">Passphrase Cracking</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                GPU-accelerated cracking for LUKS, VeraCrypt, BitLocker headers.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >dd if=/dev/sdb of=luks_header.img bs=512 count=4096 hashcat
+                  -m 14600 luks_header.img rockyou.txt # LUKS2 hashcat -m 13711
+                  veracrypt.img rockyou.txt # VeraCrypt hashcat -m 22100
+                  bitlocker.img rockyou.txt # BitLocker</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🧊 Volatility + aeskeyfind
+                  <span class="badge badge-amber">RAM Forensics</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Dump physical RAM, scan for AES key schedule patterns — works
+                against all major FDE tools.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >winpmem_mini.exe memdump.raw avml /dev/mem memdump.raw
+                  aeskeyfind memdump.raw bulk_extractor -E aes memdump.raw -o
+                  output/ python3 vol.py -f memdump.raw windows.filescan</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  🔓 cryptsetup / LUKS
+                  <span class="badge badge-cyan">Header Forensics</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                Inspect KDF parameters — low iteration count = faster cracking.
+                Always backup header first.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >cryptsetup luksDump /dev/sdb cryptsetup luksDump /dev/sdb |
+                  grep "Iterations" cryptsetup luksHeaderBackup /dev/sdb
+                  --header-backup-file header.bak</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+
+            <div class="technique">
+              <div class="tech-header">
+                <div class="tech-name">
+                  📐 Entropy Scan
+                  <span class="badge badge-sage">Detect Encryption</span>
+                </div>
+              </div>
+              <div class="tech-desc">
+                High entropy ≈7.9–8.0 bits/byte fingerprints encrypted data. Map
+                without mounting.
+              </div>
+              <div class="cmd-block">
+                <span class="cmd-text"
+                  >binwalk -E disk.img ent disk.img python3 -c " import math,
+                  collections data = open('disk.img','rb').read(65536) freq =
+                  collections.Counter(data) entropy =
+                  -sum((c/len(data))*math.log2(c/len(data)) for c in
+                  freq.values()) print(f'Entropy: {entropy:.4f}
+                  bits/byte')"</span
+                ><button class="copy-btn" onclick="copyCmd(this)">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB: CRACK LAB ════════ -->
+          <div id="tab-crack-lab" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 09 — Offensive Security</div>
+              <h1 class="page-title">Hash <em>Cracker Lab</em></h1>
+              <p class="page-desc">
+                High-performance, multi-threaded Web Worker password cracker. Test brute force, dictionary, and mask attacks locally in your browser.
+              </p>
+            </div>
+
+            <div class="alert-learning">
+              <strong>Why only MD5, SHA-1, and SHA-256?</strong>
+              You'll notice we aren't supporting heavy Key Derivation Functions (KDFs) like bcrypt, scrypt, or Argon2. Those functions deliberately exhaust CPU or RAM to slow down guessing. While our JavaScript WebWorker pool can hit hundreds of thousands of hashes per second on MD5, it would struggle to compute even a few dozen iterations of an Argon2 salt, grinding an in-browser attack to zero. This lab simulates high-velocity cracking against raw hashes.
+            </div>
+
+            <div class="grid-2">
+              <!-- Attack Config -->
+              <div class="card card-mb glow-amber">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">⚡</div>
+                  <div>
+                    <div class="card-title-text">Attack Configuration</div>
+                    <div class="card-subtitle">
+                      Set target hash and attack methodology
+                    </div>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label>Target Hash (Hex)</label>
+                  <input
+                    type="text"
+                    id="crackHashInput"
+                    placeholder="e.g. 5f4dcc3b5aa765d61d8327deb882cf99"
+                    value="5f4dcc3b5aa765d61d8327deb882cf99"
+                  />
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label>Algorithm</label>
+                    <select id="crackHashAlgo" class="seg-ctrl" style="width:100%; height:34px; border-radius:6px; background:var(--glass2); color:var(--text); border:1px solid var(--border2); padding:0 8px;">
+                      <option value="MD5">MD5</option>
+                      <option value="SHA-1">SHA-1</option>
+                      <option value="SHA-256">SHA-256</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Attack Type</label>
+                    <select id="crackAttackType" class="seg-ctrl" style="width:100%; height:34px; border-radius:6px; background:var(--glass2); color:var(--text); border:1px solid var(--border2); padding:0 8px;">
+                      <option value="dictionary">Dictionary</option>
+                      <option value="mask">Brute Force (Mask)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field mt-12">
+                  <label style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="crackRulesToggle" style="accent-color:var(--amber)" checked />
+                    Enable Rule Mangling (Capitalize, append numbers)
+                  </label>
+                </div>
+
+                <div class="upload-zone mt-16 upload-compact" style="padding: 12px">
+                  <input
+                    type="file"
+                    id="crackWordlist"
+                    accept=".txt"
+                    onchange="handleWordlistUpload(this)"
+                  />
+                  <div class="upload-label upload-label-sm">
+                    Upload Custom `.txt` Wordlist
+                  </div>
+                </div>
+                <div id="wordlistInfo" class="mono-label mt-12" style="color:var(--cyan); text-align:center;">
+                  Default Wordlist loaded
+                </div>
+              </div>
+
+              <!-- Output Terminal -->
+              <div class="card card-mb">
+                <div class="card-header">
+                  <div class="card-icon icon-cyan">🖥️</div>
+                  <div>
+                    <div class="card-title-text">Worker Terminal</div>
+                    <div class="card-subtitle">
+                      Live parallel thread output
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="flex" style="gap:10px; margin-bottom:14px;">
+                  <button class="btn btn-rose" style="flex:2" onclick="startCracker()">▶ Launch Attack</button>
+                  <button class="btn btn-ghost" style="flex:1" onclick="stopCracker()">⏹ Stop</button>
+                </div>
+
+                <div class="stat-grid" style="margin-bottom:14px;">
+                  <div class="stat-card" style="padding: 8px;">
+                    <span class="stat-value" id="crackSpeed" style="font-size:16px;">0 H/s</span>
+                    <span class="stat-label">Velocity</span>
+                  </div>
+                </div>
+
+                <div
+                  id="crackOutput"
+                  class="terminal"
+                  style="min-height: 180px; max-height: 180px; overflow-y:auto;"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ════════ TAB 7: THEORY ════════ -->
+          <div id="tab-theory" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">Module 07 — Reference</div>
+              <h1 class="page-title">Theory & <em>Concepts</em></h1>
+              <p class="page-desc">
+                The academic foundation — steganography, RSA, AES modes,
+                entropy, cold boot attacks.
+              </p>
+            </div>
+
+            <div class="theory-card">
+              <div class="theory-tag">Steganography</div>
+              <h3>What is Steganography?</h3>
+              <p>
+                Steganography hides the <strong>existence</strong> of a message
+                — unlike cryptography which hides its content. From Greek:
+                <em>steganos</em> (covered) + <em>graphia</em> (writing). A
+                hidden message raises no suspicion; an encrypted file screams
+                "something secret is here."
+              </p>
+              <p>
+                Modern digital steganography hides data inside:
+                <code>Images</code>, <code>Audio files</code>,
+                <code>Video frames</code>, <code>Network packet timing</code>,
+                <code>Text whitespace</code>.
+              </p>
+            </div>
+
+            <div class="theory-card cyan">
+              <div class="theory-tag">Multi-bit LSB</div>
+              <h3>1-bit vs 2-bit vs 3-bit LSB</h3>
+              <p>
+                Standard 1-bit LSB replaces only the rightmost bit of each
+                channel, changing pixel values by ±1 — completely imperceptible.
+                2-bit replaces the two LSBs (±3 max change), tripling capacity
+                with minor quality loss. 3-bit replaces three LSBs (±7 max
+                change) — noticeable on close inspection but triples capacity
+                again.
+              </p>
+              <div class="formula">
+                1-bit: mask = 0xFE, bits/pixel = 3, max_delta = ±1<br />
+                2-bit: mask = 0xFC, bits/pixel = 6, max_delta = ±3<br />
+                3-bit: mask = 0xF8, bits/pixel = 9, max_delta = ±7<br /><br />
+                <span class="comment"
+                  >// Capacity: (W × H × 3 × depth) / 8 bytes</span
+                >
+              </div>
+            </div>
+
+            <div class="theory-card rose">
+              <div class="theory-tag">RSA Cryptography</div>
+              <h3>RSA — Asymmetric Encryption</h3>
+              <p>
+                RSA security relies on the computational difficulty of factoring
+                large semiprime numbers (n = p×q). Encryption uses the public
+                key; decryption requires the private key. The modular inverse
+                relationship between e and d ensures only d can undo what e does
+                — and vice versa for signing.
+              </p>
+              <div class="formula">
+                Public key: (n, e) — share freely<br />
+                Private key: (n, d) — keep secret<br /><br />
+                Encrypt: C = Mᵉ mod n<br />
+                Decrypt: M = Cᵈ mod n<br /><br />
+                <span class="comment"
+                  >// For 2048-bit RSA: factoring n would take longer than the
+                  age of the universe</span
+                >
+              </div>
+            </div>
+
+            <div class="theory-card sage">
+              <div class="theory-tag">AES Modes</div>
+              <h3>Why Cipher Mode Matters</h3>
+              <p>
+                AES is a block cipher — it encrypts 128-bit chunks. The
+                <em>mode</em> determines how blocks are chained. ECB encrypts
+                each block independently, leaking patterns. CBC XORs each block
+                with the previous ciphertext. CTR/GCM turn AES into a stream
+                cipher, enabling parallelism and (in GCM) authentication.
+              </p>
+              <p>
+                The IV (Initialization Vector) randomizes the first block in
+                CBC, ensuring identical plaintexts produce different
+                ciphertexts. Reusing an IV with the same key in CTR/GCM allows
+                full plaintext recovery — one of the most catastrophic possible
+                mistakes.
+              </p>
+            </div>
+
+            <div class="theory-card">
+              <div class="theory-tag">Shannon Entropy</div>
+              <h3>Entropy & Encrypted Data</h3>
+              <div class="formula">
+                H(X) = −Σ P(xᵢ) · log₂ P(xᵢ)<br /><br />
+                English text: ≈ 4.0 – 4.5 bits/byte<br />
+                Compressed data: ≈ 7.5 – 7.9 bits/byte<br />
+                Encrypted data: ≈ 7.95 – 8.0 bits/byte (theoretical max)
+              </div>
+              <p>
+                Encrypted data is indistinguishable from random noise — maximum
+                Shannon entropy. This is how forensic tools detect encrypted
+                partitions on disk without decryption, and why you can't
+                compress encrypted data.
+              </p>
+            </div>
+
+            <div class="theory-card lilac">
+              <div class="theory-tag">Cold Boot Attack</div>
+              <h3>RAM Key Persistence</h3>
+              <p>
+                DRAM cells retain data for seconds to minutes after power loss.
+                At low temperatures, for hours. An attacker can freeze RAM,
+                transfer it to another machine, dump memory, and scan for AES
+                key schedules with aeskeyfind. Demonstrated against BitLocker,
+                FileVault, dm-crypt by Princeton in 2008.
+              </p>
+              <p>
+                Defense: disable hibernation, enforce TPM + anti-hammering PIN,
+                enable AMD SME / Intel TME hardware memory encryption.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Tooltip Logic -->
+    <script>
+      window.toggleTooltipMode = function(element) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        const wrap = element.closest('.info-tooltip-wrap');
+        if (!wrap) return;
+        const tooltip = wrap.querySelector('.info-tooltip');
+        if (tooltip) {
+          tooltip.classList.toggle('show-complete');
+          tooltip.classList.add('active');
+        }
+      };
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.info-tooltip-wrap')) {
+          document.querySelectorAll('.info-tooltip.active').forEach(el => {
+            el.classList.remove('active');
+          });
+        }
+      });
+      
+    </script>
+    <!-- Learning Mode UI -->
+    <div id="missionOverlay" class="mission-overlay hidden"></div>
+    <div id="aiChatBubble" class="ai-chat-bubble hidden">
+      <div class="ai-chat-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="ai-icon">🤖</span> 
+          <span style="font-family: 'Syne', sans-serif; font-weight: 700; color: var(--cyan);">CipherNexus Guide</span>
+        </div>
+        <button class="ai-close-btn" onclick="window.abortMission()">✕</button>
+      </div>
+      <div class="ai-chat-body" id="aiChatText">
+        Welcome to CipherNexus! Select a mission to begin.
+      </div>
+      <div class="ai-chat-footer">
+        <button id="aiNextBtn" class="btn btn-ghost" style="padding: 4px 12px; font-size: 11px; display: none;" onclick="window.missionNextStep()">Continue</button>
+      </div>
+    </div>
+    <script src="js/missions.js"></script>
+    
+    <!-- App entry point — ES module, loads all other JS modules -->
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
