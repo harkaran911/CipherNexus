@@ -41,7 +41,7 @@ Serving the project from a local web server avoids browser file origin restricti
 #### With Python 3
 
 ```powershell
-cd e:\StegoVault
+cd CipherNexus
 python -m http.server 5500
 ```
 
@@ -52,7 +52,7 @@ Then open `http://localhost:5500` in your browser.
 If you want to run a local static server:
 
 ```powershell
-cd e:\StegoVault
+cd CipherNexus
 npm install
 npx http-server . -p 5500
 ```
