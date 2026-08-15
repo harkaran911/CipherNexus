@@ -210,14 +210,19 @@ function runMissionStep() {
 
   // Update chat bubble
   const chatText = document.getElementById('aiChatText');
-  chatText.innerHTML = `<strong>[${mission.title}]</strong><br/>${step.text}`;
+  chatText.replaceChildren();
+  const titleEl = document.createElement('strong');
+  titleEl.textContent = `[${mission.title}]`;
+  chatText.appendChild(titleEl);
+  chatText.appendChild(document.createElement('br'));
+  chatText.appendChild(document.createTextNode(step.text));
 
   // Execute setup hook
   if (step.setup) step.setup();
 
   if (step.action === 'end') {
     document.getElementById('aiNextBtn').style.display = 'block';
-    document.getElementById('aiNextBtn').innerText = "Finish";
+    document.getElementById('aiNextBtn').textContent = "Finish";
     document.getElementById('aiNextBtn').onclick = window.abortMission;
     return;
   }

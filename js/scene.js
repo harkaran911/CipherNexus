@@ -1,5 +1,5 @@
 /**
- * scene.js — StegoVault v3 WebGL Background
+ * scene.js — CipherNexus v3 WebGL Background
  * Three.js-powered ambient scene with wireframe polyhedra,
  * 3D particle field, fog, and mouse parallax.
  * Replaces: CSS orbs + 2D canvas particles + grain overlay.
@@ -162,7 +162,6 @@ function animate() {
   animId = requestAnimationFrame(animate);
 
   const t = clock.getElapsedTime();
-  const delta = clock.getDelta();
 
   // Polyhedra rotation
   if (wireIco) {

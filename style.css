@@ -38,6 +38,7 @@
   --warn: #fbbf24;
 
   --r: 14px;
+  --r1: 11px;
   --r2: 8px;
   --sidebar-w: 230px;
 }
@@ -1085,6 +1086,10 @@ select option {
 
 .t-muted {
   color: var(--text3);
+}
+
+.t-safe {
+  color: var(--sage);
 }
 
 /* ══════════════════════════════════════════════════════════

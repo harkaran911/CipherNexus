@@ -48,7 +48,7 @@ export async function handleAudioUpload(fileInput) {
             currentPcm16 = floatTo16BitPCM(currentAudioBuffer.getChannelData(0));
             
             // Draw static waveform or prepare spectrogram
-            document.getElementById('audioStatus').innerText = "Audio loaded successfully. Ready to encode/decode.";
+            document.getElementById('audioStatus').textContent = "Audio loaded successfully. Ready to encode/decode.";
             drawSpectrogramPreview();
         } catch (err) {
             log(`[ERROR] Failed to decode audio: ${err.message}`, "err");

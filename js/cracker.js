@@ -1,11 +1,11 @@
 /**
- * cracker.js — StegoVault v3
+ * cracker.js — CipherNexus v3
  * UI logic and Worker Pool manager for Password Cracking Lab.
  */
 
 "use strict";
 
-import { mkLogger } from "./security.js";
+import { mkLogger, appendToTerminal } from "./security.js";
 
 // Top ~100 common passwords for immediate testing without a file upload
 const DEFAULT_WORDLIST = [
@@ -58,6 +58,13 @@ export function startCracker() {
 
     if (!targetHashHex || !/^[0-9a-f]+$/.test(targetHashHex)) {
         log("[ERROR] Please provide a valid hexadecimal hash target.", "err");
+        return;
+    }
+
+    const EXPECTED_LENGTHS = { "MD5": 32, "SHA-1": 40, "SHA-256": 64 };
+    const expectedLen = EXPECTED_LENGTHS[hashAlgo];
+    if (expectedLen && targetHashHex.length !== expectedLen) {
+        log(`[ERROR] Hash length mismatch: ${hashAlgo} requires ${expectedLen} hex chars, got ${targetHashHex.length}.`, "err");
         return;
     }
 
@@ -167,18 +174,19 @@ export function startCracker() {
 export function stopCracker() {
     if (!isRunning) return;
     isRunning = false;
-    
+
     workers.forEach(w => w.terminate());
     workers = [];
     clearInterval(statsInterval);
-    
+
     const elapsed = (performance.now() - startTime) / 1000;
     const speed = totalHashes / elapsed;
 
-    const log = mkLogger("crackOutput");
+    // Use appendToTerminal directly to preserve all prior output
+    const log = (msg, cls) => appendToTerminal("crackOutput", msg, cls);
     log(`[*] Attack terminated.`, "muted");
     log(`[*] Stats: ${totalHashes.toLocaleString()} total hashes in ${elapsed.toFixed(2)}s (~${Math.round(speed).toLocaleString()} H/s).`, "info");
-    
+
     if (foundResult) {
         log(`[✓] SUCCESS: Plaintext is "${foundResult}"`, "safe");
     } else {
