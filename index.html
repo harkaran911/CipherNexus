@@ -195,6 +195,11 @@
             ></span>
           </div>
 
+          <div class="nav-section-label">CTF Toolkit</div>
+          <div class="nav-item" onclick="switchTab('ctf-toolkit', this)">
+            <span class="nav-icon">🚩</span> CTF Tools<span class="nav-dot"></span>
+          </div>
+
           <div class="nav-section-label">Reference</div>
           <div class="nav-item" onclick="switchTab('theory', this)">
             <span class="nav-icon">📖</span> Theory & Concepts<span
@@ -1099,6 +1104,115 @@
               </div>
             </div>
 
+            <!-- ─── FORENSICS TOOLKIT ──────────────────────────── -->
+            <div class="section-title" style="margin-top:40px;">
+              <span class="section-badge">IN-BROWSER FORENSICS</span>
+              <h2>File Forensics Toolkit</h2>
+              <p class="section-desc">Client-side analysis tools — no upload, no server, no data leaves your browser.</p>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:20px;">
+
+              <!-- EXIF / Metadata -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-cyan">🏷️</div>
+                  <div>
+                    <div class="card-title-text">Metadata / EXIF Extractor</div>
+                    <div class="card-subtitle">Parse JPEG EXIF IFDs, PNG text chunks, timestamps, GPS</div>
+                  </div>
+                </div>
+                <div class="upload-zone" style="margin-bottom:12px;">
+                  <input type="file" id="metaFile" accept="image/*" onchange="window.runMetadataExtract(this)" />
+                  <div class="upload-icon">🏷️</div>
+                  <div class="upload-text">Drop any image</div>
+                  <div class="upload-subtext">JPEG / PNG</div>
+                </div>
+                <div class="terminal" id="metaOutput" style="display:none;"></div>
+              </div>
+
+              <!-- Strings Extractor -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">🔤</div>
+                  <div>
+                    <div class="card-title-text">Strings Extractor</div>
+                    <div class="card-subtitle">Find printable ASCII sequences — browser equivalent of <code>strings</code></div>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Min length</label>
+                  <input type="number" id="stringsMinLen" value="4" min="1" max="64" style="width:80px;" />
+                </div>
+                <div class="upload-zone" style="margin-bottom:12px;">
+                  <input type="file" id="stringsFile" accept="*" onchange="window.runStringsExtract(this)" />
+                  <div class="upload-icon">🔤</div>
+                  <div class="upload-text">Drop any file</div>
+                  <div class="upload-subtext">Image, audio, binary…</div>
+                </div>
+                <div class="terminal" id="stringsOutput" style="display:none;"></div>
+              </div>
+
+              <!-- PNG Chunk Analyzer -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">🧩</div>
+                  <div>
+                    <div class="card-title-text">PNG Chunk Analyzer</div>
+                    <div class="card-subtitle">Parse all IDAT/tEXt/zTXt/unknown chunks, detect trailing data</div>
+                  </div>
+                </div>
+                <div class="upload-zone" style="margin-bottom:12px;">
+                  <input type="file" id="pngChunkFile" accept="image/png" onchange="window.runPNGChunks(this)" />
+                  <div class="upload-icon">🧩</div>
+                  <div class="upload-text">Drop a PNG file</div>
+                  <div class="upload-subtext">Unknown chunks = red flag</div>
+                </div>
+                <div class="terminal" id="pngchunkOutput" style="display:none;"></div>
+              </div>
+
+              <!-- Hex Dump -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-cyan">💾</div>
+                  <div>
+                    <div class="card-title-text">Hex Dump Viewer</div>
+                    <div class="card-subtitle">First 2 KB in classic hex + ASCII layout</div>
+                  </div>
+                </div>
+                <div class="upload-zone" style="margin-bottom:12px;">
+                  <input type="file" id="hexdumpFile" accept="*" onchange="window.runHexDump(this)" />
+                  <div class="upload-icon">💾</div>
+                  <div class="upload-text">Drop any file</div>
+                  <div class="upload-subtext">Shows first 2048 bytes</div>
+                </div>
+                <div class="terminal" id="hexdumpOutput" style="display:none;"></div>
+              </div>
+
+            </div>
+
+            <!-- Embedded File Carver (full width) -->
+            <div class="card" style="margin-bottom:20px;">
+              <div class="card-header">
+                <div class="card-icon icon-rose">🔪</div>
+                <div>
+                  <div class="card-title-text">Embedded File Carver</div>
+                  <div class="card-subtitle">Scan for 25+ embedded file magic bytes — ZIP, RAR, 7z, PNG, JPEG, ELF, PDF, GZIP, SQLite…</div>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">
+                Detects file-within-file hiding: e.g. a JPEG that contains a hidden ZIP starting at byte 0x1F3A. Reports exact byte offset so you can <code>dd</code> or binwalk extract it.
+              </p>
+              <div class="upload-zone">
+                <input type="file" id="carverFile" accept="*" onchange="window.runFileCarver(this)" />
+                <div class="upload-icon">🔪</div>
+                <div class="upload-text">Drop any file to scan</div>
+                <div class="upload-subtext">Detects 25 file formats</div>
+              </div>
+              <div class="terminal" id="carverOutput" style="display:none;margin-top:12px;"></div>
+            </div>
+
+            <!-- Checklist -->
             <div class="card mt-20">
               <div class="card-header">
                 <div class="card-icon icon-amber">✅</div>
@@ -1198,9 +1312,12 @@
                   <div style="position: absolute; top: 10px; right: 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 4px;">Frequency Range: 0 - 22kHz</div>
                 </div>
 
-                <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
                   <button class="btn btn-ghost btn-full" onclick="window.playAndVisualize()">
                     ▶️ Play & Visualize
+                  </button>
+                  <button id="audioStopBtn" class="btn btn-full" style="background:var(--rose-d);color:var(--rose);border:1px solid var(--rose);flex:1" onclick="window.stopAudio()" disabled>
+                    ⏹ Stop
                   </button>
                   <button id="audioDownloadBtn" class="btn btn-primary btn-full" onclick="window.exportWAV()" disabled>
                     💾 Download Stego-WAV
@@ -1211,6 +1328,65 @@
                   <strong>Forensic Note:</strong> Browser-based audio formats like MP3 compress data by removing frequencies humans can't hear. This completely destroys LSB steganography! Therefore, this lab strictly outputs uncompressed WAV files.
                 </div>
               </div>
+            </div>
+
+            <!-- WAV Metadata Analyzer -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">🗂️</div>
+                <div>
+                  <div class="card-title-text">WAV / RIFF Chunk Analyzer</div>
+                  <div class="card-subtitle">Parse WAV header chunks, detect unknown/hidden chunks and trailing data</div>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">
+                Analyzes the RIFF container structure. Unknown chunks and trailing data after the final chunk are common CTF hiding spots.
+              </p>
+              <button class="btn btn-cyan" style="margin-bottom:14px;" onclick="window.analyzeWAVMetadata(document.getElementById('audioFile'))">
+                🔬 Analyze Loaded WAV
+              </button>
+              <div class="terminal" id="wavMetaOutput" style="display:none;"></div>
+            </div>
+
+            <!-- LSB Bit Map -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-rose">🗺️</div>
+                <div>
+                  <div class="card-title-text">LSB Bit Map</div>
+                  <div class="card-subtitle">Visual fingerprint of the lowest significant bits across all samples</div>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">
+                Each pixel = one audio sample's LSB. Cyan = bit 1, dark = bit 0. A hidden payload produces a structured (non-random) pattern in the first section.
+              </p>
+              <button class="btn btn-rose" style="margin-bottom:14px;" onclick="window.drawLSBBitmap()">
+                🗺️ Render LSB Map
+              </button>
+              <div class="img-frame" style="height:120px;background:rgba(13,13,26,0.8);border:1px solid var(--border2);overflow:hidden;">
+                <canvas id="lsbBitmapCanvas" width="800" height="120" style="width:100%;height:100%;object-fit:fill;"></canvas>
+              </div>
+            </div>
+
+            <!-- Stereo Channel Analysis -->
+            <div class="card mt-20">
+              <div class="card-header">
+                <div class="card-icon icon-amber">🎚️</div>
+                <div>
+                  <div class="card-title-text">Stereo Channel Forensics</div>
+                  <div class="card-subtitle">Compare L / R channels — detect dual-mono encoding and LSB mismatches</div>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">
+                Data hidden only in the Left or Right channel creates a measurable L-R statistical difference. Near-identical channels on a stereo file is a red flag.
+              </p>
+              <button class="btn btn-amber" style="margin-bottom:14px;" onclick="window.analyzeStereoChannels()">
+                📊 Analyze Channels
+              </button>
+              <div class="img-frame" style="height:160px;background:rgba(13,13,26,0.8);border:1px solid var(--border2);overflow:hidden;margin-bottom:14px;">
+                <canvas id="stereoCanvas" width="800" height="160" style="width:100%;height:100%;object-fit:fill;"></canvas>
+              </div>
+              <div class="terminal" id="stereoOutput" style="display:none;"></div>
             </div>
           </div>
 
@@ -2826,6 +3002,238 @@ The quick brown fox jumps over the lazy dog. 1234567890!</textarea
                 ></div>
               </div>
             </div>
+          </div>
+
+          <!-- ════════ TAB: CTF TOOLKIT ════════ -->
+          <div id="tab-ctf-toolkit" class="tab-panel">
+            <div class="page-header">
+              <div class="page-eyebrow">CTF Toolkit</div>
+              <h1 class="page-title">CTF <em>Arsenal</em></h1>
+              <p class="page-desc">XOR analysis, hash identification, classical cipher suite, and frequency analysis — the tools that appear in 80% of crypto/steg CTF challenges.</p>
+            </div>
+
+            <!-- ─── HASH IDENTIFIER ────────────────────────── -->
+            <div class="section-title">
+              <span class="section-badge">TOOL 01</span>
+              <h2>Hash Identifier</h2>
+            </div>
+            <div class="card" style="margin-bottom:24px;">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">🔎</div>
+                <div>
+                  <div class="card-title-text">Hash Identifier</div>
+                  <div class="card-subtitle">Identify MD5, SHA-1/256/512, bcrypt, NTLM, Unix crypt, Argon2 and more by length &amp; format</div>
+                </div>
+              </div>
+              <div class="field">
+                <label>Paste hash</label>
+                <input type="text" id="hashIdInput" placeholder="e.g. 5f4dcc3b5aa765d61d8327deb882cf99" style="font-family:'DM Mono',monospace;" />
+              </div>
+              <button class="btn btn-cyan" style="margin-top:10px;" onclick="window.identifyHash()">🔎 Identify</button>
+              <div class="terminal" id="hashIdOutput" style="display:none;margin-top:14px;"></div>
+            </div>
+
+            <!-- ─── XOR ANALYZER ──────────────────────────── -->
+            <div class="section-title">
+              <span class="section-badge">TOOL 02</span>
+              <h2>XOR Analyzer</h2>
+            </div>
+            <div class="card" style="margin-bottom:24px;">
+              <div class="card-header">
+                <div class="card-icon icon-rose">⊕</div>
+                <div>
+                  <div class="card-title-text">XOR Brute Force &amp; Key Recovery</div>
+                  <div class="card-subtitle">Single-byte brute force + multi-byte Kasiski key-length detection + columnar key recovery</div>
+                </div>
+              </div>
+              <div class="grid-2" style="gap:12px;margin-bottom:14px;">
+                <div class="field">
+                  <label>Ciphertext</label>
+                  <textarea id="xorInput" placeholder="Hex: 1a2b3c... or base64 or raw text" style="height:80px;font-family:'DM Mono',monospace;"></textarea>
+                </div>
+                <div>
+                  <div class="field" style="margin-bottom:10px;">
+                    <label>Input format</label>
+                    <select id="xorInputFormat" class="select-field">
+                      <option value="hex">Hex</option>
+                      <option value="base64">Base64</option>
+                      <option value="text">Raw text</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label>Known key (for direct XOR)</label>
+                    <input type="text" id="xorKey" placeholder="hex bytes or string" style="font-family:'DM Mono',monospace;" />
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-rose" onclick="window.runXORAnalyze()">⊕ Auto-Analyze (brute force)</button>
+                <button class="btn btn-ghost" onclick="window.runXORWithKey()">🔑 XOR with Key</button>
+              </div>
+              <div class="terminal" id="xorOutput" style="display:none;margin-top:14px;"></div>
+            </div>
+
+            <!-- ─── CLASSICAL CIPHERS ─────────────────────── -->
+            <div class="section-title">
+              <span class="section-badge">TOOL 03</span>
+              <h2>Classical Ciphers</h2>
+            </div>
+
+            <div class="grid-2" style="margin-bottom:20px;">
+
+              <!-- Caesar / ROT -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">🔁</div>
+                  <div>
+                    <div class="card-title-text">Caesar / ROT Cipher</div>
+                    <div class="card-subtitle">Single-shift substitution with brute-force all 25 rotations</div>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Input text</label>
+                  <textarea id="caesarInput" style="height:70px;" placeholder="Plaintext or ciphertext…"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                  <div class="field" style="flex:1;min-width:80px;">
+                    <label>Shift</label>
+                    <input type="number" id="caesarShift" value="13" min="1" max="25" />
+                  </div>
+                  <div class="field" style="flex:1;min-width:80px;">
+                    <label>Operation</label>
+                    <select id="caesarOp" class="select-field">
+                      <option value="encrypt">Encrypt</option>
+                      <option value="decrypt">Decrypt</option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn btn-amber" onclick="window.runCaesar()">Run</button>
+                  <button class="btn btn-ghost" onclick="window.runCaesarBrute()">Brute all 25</button>
+                </div>
+                <div class="terminal" id="caesarOutput" style="display:none;margin-top:12px;"></div>
+              </div>
+
+              <!-- Vigenere -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-cyan">🗝️</div>
+                  <div>
+                    <div class="card-title-text">Vigenere Cipher</div>
+                    <div class="card-subtitle">Polyalphabetic substitution with a repeating keyword</div>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Input text</label>
+                  <textarea id="vigenereInput" style="height:70px;" placeholder="Text to encrypt or decrypt…"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                  <div class="field" style="flex:2;">
+                    <label>Key (letters only)</label>
+                    <input type="text" id="vigenereKey" placeholder="e.g. SECRET" />
+                  </div>
+                  <div class="field" style="flex:1;">
+                    <label>Operation</label>
+                    <select id="vigenereOp" class="select-field">
+                      <option value="encrypt">Encrypt</option>
+                      <option value="decrypt">Decrypt</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="btn btn-cyan" onclick="window.runVigenere()">Run Vigenere</button>
+                <div class="terminal" id="vigenereOutput" style="display:none;margin-top:12px;"></div>
+              </div>
+
+              <!-- Atbash -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-rose">🔄</div>
+                  <div>
+                    <div class="card-title-text">Atbash Cipher</div>
+                    <div class="card-subtitle">A↔Z mirror substitution (symmetric — same operation for encode &amp; decode)</div>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Input text</label>
+                  <textarea id="atbashInput" style="height:70px;" placeholder="Any text…"></textarea>
+                </div>
+                <button class="btn btn-rose" onclick="window.runAtbash()">Run Atbash</button>
+                <div class="terminal" id="atbashOutput" style="display:none;margin-top:12px;"></div>
+              </div>
+
+              <!-- Rail Fence -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-icon icon-amber">🚂</div>
+                  <div>
+                    <div class="card-title-text">Rail Fence Cipher</div>
+                    <div class="card-subtitle">Zigzag transposition across N rails</div>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Input text</label>
+                  <textarea id="railInput" style="height:70px;" placeholder="Text to transpose…"></textarea>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                  <div class="field" style="flex:1;">
+                    <label>Rails</label>
+                    <input type="number" id="railCount" value="3" min="2" max="20" />
+                  </div>
+                  <div class="field" style="flex:1;">
+                    <label>Operation</label>
+                    <select id="railOp" class="select-field">
+                      <option value="encrypt">Encrypt</option>
+                      <option value="decrypt">Decrypt</option>
+                    </select>
+                  </div>
+                </div>
+                <button class="btn btn-amber" onclick="window.runRailFence()">Run Rail Fence</button>
+                <div class="terminal" id="railOutput" style="display:none;margin-top:12px;"></div>
+              </div>
+
+            </div>
+
+            <!-- ─── FREQUENCY ANALYSIS ────────────────────── -->
+            <div class="section-title">
+              <span class="section-badge">TOOL 04</span>
+              <h2>Frequency Analysis</h2>
+            </div>
+            <div class="card" style="margin-bottom:24px;">
+              <div class="card-header">
+                <div class="card-icon icon-cyan">📊</div>
+                <div>
+                  <div class="card-title-text">Letter Frequency Analysis</div>
+                  <div class="card-subtitle">Compare letter distribution to English — reveals substitution cipher patterns</div>
+                </div>
+              </div>
+              <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">
+                In English, the most common letters are <strong>E T A O I N S H R D L</strong>. If your ciphertext has the same relative distribution, it's likely a monoalphabetic substitution cipher.
+              </p>
+              <div class="field" style="margin-bottom:12px;">
+                <label>Ciphertext</label>
+                <textarea id="freqInput" style="height:90px;" placeholder="Paste ciphertext here — non-alpha characters are ignored…"></textarea>
+              </div>
+              <button class="btn btn-cyan" onclick="window.runFrequencyAnalysis()">📊 Analyze Frequencies</button>
+              <div class="terminal" id="freqOutput" style="display:none;margin-top:14px;"></div>
+            </div>
+
+            <!-- ─── ROT13 QUICK TOOL ───────────────────────── -->
+            <div class="card" style="margin-bottom:24px;">
+              <div class="card-header">
+                <div class="card-icon icon-rose">🔁</div>
+                <div>
+                  <div class="card-title-text">ROT13 Quick Decode</div>
+                  <div class="card-subtitle">Symmetric — same operation for encode and decode</div>
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:12px;">
+                <label>Input</label>
+                <textarea id="rot13Input" style="height:70px;" placeholder="Paste text…"></textarea>
+              </div>
+              <button class="btn btn-rose" onclick="window.runROT13()">Apply ROT13</button>
+              <div class="terminal" id="rot13Output" style="display:none;margin-top:12px;"></div>
+            </div>
+
           </div>
 
           <!-- ════════ TAB 7: THEORY ════════ -->

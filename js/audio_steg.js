@@ -13,6 +13,7 @@ let audioCtx = null;
 let currentAudioBuffer = null;
 let currentPcm16 = null; // Int16Array
 let sampleRate = 44100;
+let currentFileName = "";
 
 // Reusable Analyser nodes
 let analyserNode = null;
@@ -30,6 +31,7 @@ function getAudioContext() {
 export async function handleAudioUpload(fileInput) {
     const file = fileInput.files[0];
     if (!file) return;
+    currentFileName = file.name;
 
     const log = mkLogger("audioLog");
     log(`[*] Loading audio file: ${file.name}...`, "muted");
@@ -42,13 +44,19 @@ export async function handleAudioUpload(fileInput) {
             currentAudioBuffer = await ctx.decodeAudioData(arrayBuffer);
             sampleRate = currentAudioBuffer.sampleRate;
             
-            log(`[✓] Audio decoded: ${currentAudioBuffer.duration.toFixed(2)}s | ${sampleRate} Hz | ${currentAudioBuffer.numberOfChannels} ch`, "safe");
-            
+            const ch = currentAudioBuffer.numberOfChannels;
+            log(`[✓] Audio decoded: ${currentAudioBuffer.duration.toFixed(2)}s | ${sampleRate} Hz | ${ch} channel(s)`, "safe");
+            if (ch > 1) log(`[*] Stereo file detected — using channel 0 (left) for LSB ops`, "info");
+
             // Convert to 16-bit PCM immediately for LSB operations
             currentPcm16 = floatTo16BitPCM(currentAudioBuffer.getChannelData(0));
-            
+
             // Draw static waveform or prepare spectrogram
             document.getElementById('audioStatus').textContent = "Audio loaded successfully. Ready to encode/decode.";
+
+            // Enable stop button
+            const stopBtn = document.getElementById("audioStopBtn");
+            if (stopBtn) stopBtn.disabled = false;
             drawSpectrogramPreview();
         } catch (err) {
             log(`[ERROR] Failed to decode audio: ${err.message}`, "err");
@@ -283,6 +291,235 @@ function drawLiveSpectrogram() {
     animationId = requestAnimationFrame(drawLiveSpectrogram);
 }
 
+// ─── Stop Playback ────────────────────────────────────────────
+export function stopAudio() {
+    if (sourceNode) { try { sourceNode.stop(); } catch {} sourceNode = null; }
+    if (animationId) { cancelAnimationFrame(animationId); animationId = null; }
+    analyserNode = null;
+    // Clear canvas back to static waveform
+    if (currentPcm16) drawSpectrogramPreview();
+}
+
+// ─── WAV Metadata / Chunk Analyzer ───────────────────────────
+export function analyzeWAVMetadata(fileInput) {
+    const file = fileInput ? fileInput.files[0] : null;
+    // If called without a new file, re-analyze the current buffer info
+    const log = mkLogger("wavMetaOutput");
+
+    if (!currentAudioBuffer) {
+        log("[ERROR] No audio file loaded. Upload a WAV file first.", "err");
+        return;
+    }
+
+    log(`[*] File: ${currentFileName}`, "info");
+    log(`[*] Duration:    ${currentAudioBuffer.duration.toFixed(4)} seconds`, "info");
+    log(`[*] Sample rate: ${sampleRate} Hz`, "info");
+    log(`[*] Channels:    ${currentAudioBuffer.numberOfChannels}`, "info");
+    log(`[*] PCM samples: ${currentPcm16.length.toLocaleString()} (mono, channel 0)`, "muted");
+    log(`[*] Bit depth:   16-bit PCM (WAV standard)`, "muted");
+    log(`[*] LSB capacity: ${Math.floor(currentPcm16.length / 8).toLocaleString()} bytes`, "info");
+    log("─".repeat(50), "muted");
+
+    // Parse WAV file directly if input provided
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const view = new DataView(e.target.result);
+            const bytes = new Uint8Array(e.target.result);
+
+            const fourCC = (o) => String.fromCharCode(bytes[o], bytes[o+1], bytes[o+2], bytes[o+3]);
+            if (fourCC(0) !== "RIFF" || fourCC(8) !== "WAVE") {
+                log("[WARN] Not a standard RIFF/WAVE container.", "warn");
+                return;
+            }
+
+            log("[✓] RIFF/WAVE container valid", "safe");
+            let offset = 12;
+            while (offset + 8 <= bytes.length) {
+                const chunkId = fourCC(offset);
+                const chunkSize = view.getUint32(offset + 4, true);
+                log(`  Chunk [${chunkId}]  size=${chunkSize} bytes  @0x${offset.toString(16)}`, "muted");
+
+                if (chunkId === "fmt ") {
+                    const audioFmt  = view.getUint16(offset+8, true);
+                    const channels  = view.getUint16(offset+10, true);
+                    const srate     = view.getUint32(offset+12, true);
+                    const byteRate  = view.getUint32(offset+16, true);
+                    const blockAlign= view.getUint16(offset+20, true);
+                    const bitDepth  = view.getUint16(offset+22, true);
+                    const fmtName   = { 1:"PCM", 3:"IEEE Float", 6:"A-law", 7:"µ-law", 0xFFFE:"Extensible" }[audioFmt] || `0x${audioFmt.toString(16)}`;
+                    log(`    Format:     ${fmtName}`, "info");
+                    log(`    Channels:   ${channels} | Sample rate: ${srate} Hz | Bit depth: ${bitDepth}`, "info");
+                    log(`    Byte rate:  ${byteRate} B/s | Block align: ${blockAlign}`, "muted");
+                }
+                if (chunkId === "LIST" && chunkSize > 4) {
+                    const listType = fourCC(offset + 8);
+                    log(`    LIST type: ${listType}`, "info");
+                    if (listType === "INFO") {
+                        let lo = offset + 12;
+                        while (lo + 8 <= offset + 8 + chunkSize) {
+                            const key = fourCC(lo);
+                            const vsz = view.getUint32(lo + 4, true);
+                            const val = Array.from(bytes.slice(lo+8, lo+8+vsz)).filter(b=>b).map(b=>String.fromCharCode(b)).join("");
+                            if (val.trim()) log(`    INFO/${key}: ${val.trim()}`, "info");
+                            lo += 8 + vsz + (vsz % 2);
+                        }
+                    }
+                }
+                if (chunkId !== "RIFF" && chunkId !== "fmt " && chunkId !== "data" && chunkId !== "LIST") {
+                    log(`    ⚠ Unrecognised chunk — may contain hidden data!`, "warn");
+                }
+                offset += 8 + chunkSize + (chunkSize % 2);
+                if (offset >= bytes.length) break;
+            }
+
+            // Trailing data check (after last chunk)
+            log("─".repeat(50), "muted");
+            if (offset < bytes.length) {
+                log(`[!] ${bytes.length - offset} trailing byte(s) after final chunk!`, "warn");
+            } else {
+                log("[✓] No trailing data", "safe");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+}
+
+// ─── LSB Bit Map Visualization ────────────────────────────────
+export function drawLSBBitmap() {
+    if (!currentPcm16) return;
+    const canvas = document.getElementById("lsbBitmapCanvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    const total = Math.min(currentPcm16.length, W * H);
+
+    ctx.fillStyle = "#0d0d1a";
+    ctx.fillRect(0, 0, W, H);
+
+    const imgData = ctx.createImageData(W, H);
+    for (let i = 0; i < total; i++) {
+        const bit = currentPcm16[i] & 1;
+        const x = i % W, y = Math.floor(i / W);
+        const idx = (y * W + x) * 4;
+        if (bit) {
+            imgData.data[idx]   = 78;   // cyan
+            imgData.data[idx+1] = 201;
+            imgData.data[idx+2] = 232;
+        } else {
+            imgData.data[idx]   = 13;
+            imgData.data[idx+1] = 13;
+            imgData.data[idx+2] = 26;
+        }
+        imgData.data[idx+3] = 255;
+    }
+    ctx.putImageData(imgData, 0, 0);
+
+    // Overlay: mark payload region (if any encoded data exists)
+    // First 4 bytes (32 samples) = length header
+    ctx.strokeStyle = "rgba(245,166,35,0.8)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, 32, 1);
+}
+
+// ─── Stereo Channel Analysis ──────────────────────────────────
+export function analyzeStereoChannels() {
+    const log = mkLogger("stereoOutput");
+    if (!currentAudioBuffer) { log("[ERROR] No audio loaded.", "err"); return; }
+
+    const channels = currentAudioBuffer.numberOfChannels;
+    log(`[*] Channels: ${channels}`, "info");
+
+    if (channels < 2) {
+        log("[*] Mono file — no stereo difference to analyze.", "muted");
+        log("[*] All LSB encoding operates on this single channel.", "muted");
+        return;
+    }
+
+    const L = currentAudioBuffer.getChannelData(0);
+    const R = currentAudioBuffer.getChannelData(1);
+    const n = L.length;
+
+    // Compute L-R difference stats
+    let diffSum = 0, diffMax = 0, zeroCount = 0;
+    const lsbDiffs = [];
+    for (let i = 0; i < n; i++) {
+        const lpcm = Math.round(L[i] * 32767);
+        const rpcm = Math.round(R[i] * 32767);
+        const diff = Math.abs(lpcm - rpcm);
+        diffSum += diff;
+        if (diff > diffMax) diffMax = diff;
+        if (diff === 0) zeroCount++;
+        if (i < 10000) lsbDiffs.push((lpcm & 1) ^ (rpcm & 1));
+    }
+
+    const avgDiff = diffSum / n;
+    const identicalPct = (zeroCount / n * 100).toFixed(1);
+    const lsbMismatch = lsbDiffs.filter(Boolean).length;
+
+    log(`[*] Samples:            ${n.toLocaleString()}`, "muted");
+    log(`[*] Avg L-R difference: ${avgDiff.toFixed(2)} PCM units`, "info");
+    log(`[*] Max L-R difference: ${diffMax} PCM units`, "info");
+    log(`[*] Identical samples:  ${identicalPct}% (L=R)`, "info");
+    log(`[*] LSB mismatch (first 10k): ${lsbMismatch} / 10000 samples`, avgDiff < 5 ? "warn" : "info");
+    log("─".repeat(50), "muted");
+
+    if (identicalPct > 99) {
+        log("[!] Channels are nearly identical — possible dual-mono or LSB encoding in L-R difference!", "warn");
+    } else if (avgDiff < 2) {
+        log("[*] Very low L-R difference — could be normal near-mono mix.", "muted");
+    } else {
+        log("[✓] Normal stereo difference detected.", "safe");
+    }
+
+    // Draw L vs R waveform on stereoCanvas
+    const canvas = document.getElementById("stereoCanvas");
+    if (!canvas) return;
+    const c = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    c.fillStyle = "#0d0d1a"; c.fillRect(0, 0, W, H);
+
+    const step = Math.ceil(n / W);
+    const halfH = H / 2;
+
+    // Draw L (cyan)
+    c.strokeStyle = "rgba(78,201,232,0.8)"; c.lineWidth = 1; c.beginPath();
+    for (let x = 0; x < W; x++) {
+        let min = 1, max = -1;
+        for (let j = 0; j < step && x*step+j < n; j++) {
+            const v = L[x*step+j];
+            if (v < min) min = v; if (v > max) max = v;
+        }
+        c.moveTo(x, halfH/2 + min * halfH/2);
+        c.lineTo(x, halfH/2 + max * halfH/2);
+    }
+    c.stroke();
+
+    // Draw R (amber)
+    c.strokeStyle = "rgba(245,166,35,0.8)"; c.lineWidth = 1; c.beginPath();
+    for (let x = 0; x < W; x++) {
+        let min = 1, max = -1;
+        for (let j = 0; j < step && x*step+j < n; j++) {
+            const v = R[x*step+j];
+            if (v < min) min = v; if (v > max) max = v;
+        }
+        c.moveTo(x, halfH + halfH/2 + min * halfH/2);
+        c.lineTo(x, halfH + halfH/2 + max * halfH/2);
+    }
+    c.stroke();
+
+    // Label divider
+    c.strokeStyle = "rgba(255,255,255,0.1)"; c.lineWidth = 1;
+    c.beginPath(); c.moveTo(0, halfH); c.lineTo(W, halfH); c.stroke();
+
+    c.fillStyle = "rgba(78,201,232,0.6)"; c.font = "10px DM Mono, monospace";
+    c.fillText("L", 4, 12);
+    c.fillStyle = "rgba(245,166,35,0.6)";
+    c.fillText("R", 4, halfH + 12);
+}
+
+// ─── Static Spectrogram Preview ──────────────────────────────
 // Draw a static FFT preview of the entire file (simulated) or just the first few chunks
 function drawSpectrogramPreview() {
     const canvas = document.getElementById("audioCanvas");
