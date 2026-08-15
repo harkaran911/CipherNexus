@@ -123,10 +123,22 @@
             <div class="pulse-dot"></div>
             System Online
           </div>
+          <!-- Mobile hamburger (visible ≤900px only) -->
+          <button
+            class="mobile-menu-btn"
+            id="mobileMenuBtn"
+            onclick="toggleMobileSidebar()"
+            aria-label="Open navigation"
+            title="Menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </header>
 
-      <!-- Toggle -->
+      <!-- Desktop sidebar toggle arrow -->
       <button
         class="sidebar-toggle"
         id="sidebarToggle"
@@ -135,6 +147,9 @@
       >
         <span class="toggle-arrow">&#8249;</span>
       </button>
+
+      <!-- Mobile sidebar backdrop -->
+      <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileSidebar()"></div>
 
       <div class="app-body">
         <!-- ═══════════ SIDEBAR ═══════════ -->

@@ -18,6 +18,7 @@ import {
   initCursor,
   initSidebar,
   toggleSidebar,
+  toggleMobileSidebar,
   switchTab,
   animateBlocks,
   runECBDemo,
@@ -483,6 +484,7 @@ function analyzePW() {
 Object.assign(window, {
   // sidebar / tabs
   toggleSidebar,
+  toggleMobileSidebar,
   switchTab,
   copyCmd,
 

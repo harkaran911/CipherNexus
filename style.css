@@ -2514,29 +2514,362 @@ code {
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
 }
 
-/* Responsive */
+/* ══════════════════════════════════════════════════════════
+   MOBILE HAMBURGER BUTTON (hidden on desktop)
+══════════════════════════════════════════════════════════ */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r2);
+  background: var(--glass2);
+  cursor: pointer;
+  padding: 9px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.mobile-menu-btn span {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: var(--text2);
+  border-radius: 2px;
+  transition: all 0.25s;
+}
+
+.mobile-menu-btn:hover {
+  border-color: var(--amber);
+  background: var(--amber-d);
+}
+
+.mobile-menu-btn:hover span {
+  background: var(--amber);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR BACKDROP (mobile overlay)
+══════════════════════════════════════════════════════════ */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 498;
+  cursor: pointer;
+}
+
+.sidebar-backdrop.show {
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤ 900px)
+══════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
-  .sidebar {
+  /* Hide desktop sidebar toggle arrow */
+  .sidebar-toggle {
     display: none;
   }
 
-  .content {
-    padding: 20px;
+  /* Show hamburger */
+  .mobile-menu-btn {
+    display: flex;
   }
 
+  /* Sidebar becomes fixed overlay drawer */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: 260px;
+    z-index: 499;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-top: 66px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border2);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Disable desktop collapsed behavior on mobile */
+  .sidebar.collapsed {
+    width: 260px;
+    border-right-color: var(--border2);
+  }
+
+  .sidebar.collapsed .nav-section-label,
+  .sidebar.collapsed .nav-dot,
+  .sidebar.collapsed .nav-item > *:not(.nav-icon) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Content takes full width */
+  .content {
+    padding: 24px 20px;
+    max-width: 100%;
+  }
+
+  /* Grids collapse to single column */
   .grid-2,
   .grid-3,
   .stat-grid,
-  .attack-grid {
+  .attack-grid,
+  .compare-wrap,
+  .bitplane-grid {
     grid-template-columns: 1fr;
   }
 
   header {
     padding: 0 20px;
+    height: 60px;
   }
 
-  .compare-wrap {
-    grid-template-columns: 1fr;
+  /* Page title */
+  .page-title {
+    font-size: 30px;
+    letter-spacing: -1px;
+  }
+
+  /* Tables scroll horizontally */
+  .mode-compare {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* AI chat bubble full width */
+  .ai-chat-bubble {
+    width: calc(100vw - 24px);
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤ 576px)
+══════════════════════════════════════════════════════════ */
+@media (max-width: 576px) {
+  /* Disable custom cursor on touch */
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+
+  body {
+    cursor: auto;
+  }
+
+  /* ── Header ── */
+  header {
+    height: 54px;
+    padding: 0 14px;
+  }
+
+  .logo-tagline {
+    display: none;
+  }
+
+  .ver-badge {
+    display: none;
+  }
+
+  .status-pill {
+    padding: 4px 10px;
+    font-size: 10px;
+    gap: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-right {
+    gap: 8px;
+  }
+
+  /* ── Landing ── */
+  .landing-content {
+    padding: 32px 18px;
+    margin: 12px;
+    max-width: calc(100% - 24px);
+  }
+
+  .landing-title {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+  }
+
+  .term-body {
+    height: 88px;
+  }
+
+  /* ── Content ── */
+  .content {
+    padding: 16px 12px;
+  }
+
+  /* ── Page header ── */
+  .page-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    letter-spacing: -0.6px;
+  }
+
+  .page-desc {
+    font-size: 13.5px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    padding: 16px 14px;
+  }
+
+  .card-header {
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Buttons & flex rows ── */
+  .flex {
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  /* ── Segmented control ── */
+  .seg-ctrl {
+    flex-wrap: wrap;
+  }
+
+  .seg-btn {
+    min-width: 36px;
+    flex: 1 1 auto;
+    padding: 7px 4px;
+  }
+
+  /* ── Checklist ── */
+  .checklist-item {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .cl-tool {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .cl-action {
+    font-size: 12.5px;
+  }
+
+  /* ── Terminal ── */
+  .terminal {
+    font-size: 11.5px;
+    padding: 12px 14px;
+  }
+
+  /* ── Block visualizer ── */
+  .block-cell {
+    width: 34px;
+    height: 34px;
+    font-size: 9px;
+  }
+
+  /* ── Stat cards ── */
+  .stat-value {
+    font-size: 22px;
+  }
+
+  /* ── Theory cards ── */
+  .theory-card {
+    padding: 20px 16px;
+  }
+
+  .theory-card h3 {
+    font-size: 17px;
+  }
+
+  /* ── Tech card header ── */
+  .tech-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* ── AES mode tabs ── */
+  .aes-mode-tabs {
+    gap: 5px;
+  }
+
+  .mode-tab {
+    padding: 6px 11px;
+    font-size: 11px;
+  }
+
+  /* ── Tooltips: pin to right edge to avoid viewport overflow ── */
+  .info-tooltip {
+    width: min(280px, calc(100vw - 28px));
+    left: auto;
+    right: -8px;
+    transform: translateX(0) translateY(10px);
+  }
+
+  .info-tooltip-wrap:hover .info-tooltip,
+  .info-tooltip-wrap:focus-within .info-tooltip,
+  .info-tooltip.active {
+    transform: translateX(0) translateY(0);
+  }
+
+  .info-tooltip::after {
+    left: auto;
+    right: 16px;
+    transform: none;
+  }
+
+  /* ── AI chat bubble ── */
+  .ai-chat-bubble {
+    width: calc(100vw - 16px);
+    right: 8px;
+    bottom: 8px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — VERY SMALL (≤ 360px)
+══════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  .page-title {
+    font-size: 19px;
+  }
+
+  .landing-title {
+    font-size: 22px;
+  }
+
+  .card {
+    padding: 14px 12px;
+  }
+
+  .btn {
+    padding: 9px 14px;
+    font-size: 12px;
   }
 }
 
