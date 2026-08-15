@@ -23,6 +23,9 @@ let mouseX = 0,
 let cursorDot, cursorRing;
 
 export function initCursor() {
+  // Skip custom cursor on touch devices
+  if (window.matchMedia("(pointer: coarse)").matches) return;
+
   cursorDot = document.getElementById("cursorDot");
   cursorRing = document.getElementById("cursorRing");
 
@@ -70,6 +73,25 @@ export function toggleSidebar() {
   safeWriteLocalStorage("sv_sidebar", collapsed ? "0" : "1");
 }
 
+// ─── Mobile Sidebar Drawer ────────────────────────────────────
+export function toggleMobileSidebar() {
+  const sb = document.getElementById("sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (!sb || !backdrop) return;
+  const isOpen = sb.classList.toggle("mobile-open");
+  backdrop.classList.toggle("show", isOpen);
+  document.body.style.overflow = isOpen ? "hidden" : "";
+}
+
+function closeMobileSidebar() {
+  const sb = document.getElementById("sidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  if (!sb || !backdrop) return;
+  sb.classList.remove("mobile-open");
+  backdrop.classList.remove("show");
+  document.body.style.overflow = "";
+}
+
 // ─── Tab Switching ────────────────────────────────────────────
 export function switchTab(id, el) {
   document
@@ -81,6 +103,8 @@ export function switchTab(id, el) {
   const panel = document.getElementById("tab-" + id);
   if (panel) panel.classList.add("active");
   if (el) el.classList.add("active");
+  // Close mobile drawer after navigation
+  closeMobileSidebar();
   // Fire Three.js transition effect
   onTabSwitch(id);
 }
