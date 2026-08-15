@@ -2552,21 +2552,54 @@ code {
 }
 
 /* ══════════════════════════════════════════════════════════
-   SIDEBAR BACKDROP (mobile overlay)
+   SIDEBAR BACKDROP (mobile overlay) — opacity-animated
 ══════════════════════════════════════════════════════════ */
 .sidebar-backdrop {
-  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 498;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 .sidebar-backdrop.show {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR MOBILE CLOSE BUTTON
+══════════════════════════════════════════════════════════ */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: var(--glass2);
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.sidebar-close-btn:hover {
+  background: var(--rose-d);
+  border-color: var(--rose);
+  color: var(--rose);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2578,34 +2611,45 @@ code {
     display: none;
   }
 
-  /* Show hamburger */
+  /* Show hamburger and close button */
   .mobile-menu-btn {
     display: flex;
   }
 
-  /* Sidebar becomes fixed overlay drawer */
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  /* Sidebar becomes nearly-opaque fixed overlay drawer */
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100dvh;
-    width: 260px;
-    z-index: 499;
+    /* Adaptive width: never wider than 85% of viewport */
+    width: min(270px, 85vw);
+    z-index: 500;
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    padding-top: 66px;
+    /* Push nav content below the header area */
+    padding-top: 64px;
     display: flex;
     flex-direction: column;
+    /* Fully opaque on mobile — no content bleed-through */
+    background: rgba(7, 7, 15, 0.98);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
     border-right: 1px solid var(--border2);
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.6);
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
   }
 
-  /* Disable desktop collapsed behavior on mobile */
+  /* Disable desktop collapsed behaviour on mobile */
   .sidebar.collapsed {
-    width: 260px;
+    width: min(270px, 85vw);
     border-right-color: var(--border2);
   }
 
@@ -2616,10 +2660,18 @@ code {
     pointer-events: auto;
   }
 
+  /* Header sits above the backdrop — raise backdrop above header */
+  header {
+    padding: 0 20px;
+    height: 60px;
+    z-index: 501; /* above sidebar so logo is always readable */
+  }
+
   /* Content takes full width */
   .content {
     padding: 24px 20px;
     max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Grids collapse to single column */
@@ -2630,11 +2682,6 @@ code {
   .compare-wrap,
   .bitplane-grid {
     grid-template-columns: 1fr;
-  }
-
-  header {
-    padding: 0 20px;
-    height: 60px;
   }
 
   /* Page title */
@@ -2648,6 +2695,25 @@ code {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Canvases must not exceed viewport */
+  canvas,
+  #entropyCanvas,
+  #lsbBitmapCanvas,
+  #stereoCanvas {
+    max-width: 100%;
+  }
+
+  /* Block visualizer: wrap + scroll if overflows */
+  .block-viz {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* AES mode tabs wrap */
+  .aes-mode-tabs {
+    flex-wrap: wrap;
   }
 
   /* AI chat bubble full width */
@@ -2743,14 +2809,26 @@ code {
     margin-bottom: 14px;
   }
 
-  /* ── Buttons & flex rows ── */
+  /* ── Buttons & flex rows — force wrapping ── */
   .flex {
     flex-wrap: wrap;
+  }
+
+  /* Button groups inside cards */
+  .card .flex,
+  .card > div > .flex,
+  .card .field + .flex {
+    gap: 8px;
   }
 
   .btn {
     padding: 10px 16px;
     font-size: 13px;
+  }
+
+  /* Prevent btn-full from shrinking weirdly in wrapped flex */
+  .btn-full {
+    flex: 1 1 100%;
   }
 
   /* ── Segmented control ── */
@@ -2783,13 +2861,30 @@ code {
   .terminal {
     font-size: 11.5px;
     padding: 12px 14px;
+    word-break: break-all;
   }
 
   /* ── Block visualizer ── */
+  .block-viz {
+    overflow-x: auto;
+    flex-wrap: nowrap; /* let it scroll rather than wrap and break layout */
+    padding-bottom: 4px;
+  }
+
   .block-cell {
     width: 34px;
     height: 34px;
     font-size: 9px;
+    flex-shrink: 0;
+  }
+
+  /* ── Canvases ── */
+  canvas,
+  #entropyCanvas,
+  #lsbBitmapCanvas,
+  #stereoCanvas {
+    max-width: 100%;
+    height: auto;
   }
 
   /* ── Stat cards ── */
@@ -2815,11 +2910,33 @@ code {
 
   /* ── AES mode tabs ── */
   .aes-mode-tabs {
+    flex-wrap: wrap;
     gap: 5px;
   }
 
   .mode-tab {
     padding: 6px 11px;
+    font-size: 11px;
+  }
+
+  /* ── RSA key display ── */
+  .rsa-key-display {
+    font-size: 10px;
+    word-break: break-all;
+  }
+
+  /* ── Hash digest line: allow copy btn to stay visible ── */
+  .hash-digest-line {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ── Cmd block ── */
+  .cmd-block {
+    flex-wrap: wrap;
+  }
+
+  .cmd-text {
     font-size: 11px;
   }
 

@@ -154,6 +154,14 @@
       <div class="app-body">
         <!-- ═══════════ SIDEBAR ═══════════ -->
         <aside class="sidebar" id="sidebar">
+          <!-- Mobile close button (hidden on desktop) -->
+          <button
+            class="sidebar-close-btn"
+            onclick="toggleMobileSidebar()"
+            aria-label="Close navigation"
+            title="Close"
+          >✕</button>
+
           <div class="nav-section-label">Steganography</div>
           <div class="nav-item active" onclick="switchTab('steg-demo', this)">
             <span class="nav-icon">🖼️</span> Hide & Extract<span
