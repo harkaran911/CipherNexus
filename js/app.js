@@ -63,7 +63,11 @@ import {
   encodeAudioMessage,
   decodeAudioMessage,
   playAndVisualize,
-  exportWAV
+  exportWAV,
+  stopAudio,
+  analyzeWAVMetadata,
+  drawLSBBitmap,
+  analyzeStereoChannels,
 } from "./audio_steg.js";
 import {
   hashRealtime,
@@ -78,6 +82,17 @@ import {
 import { handleEncodingSync } from "./encoding.js";
 import { initCrackLab, handleWordlistUpload, startCracker, stopCracker } from "./cracker.js";
 import { initScene } from "./scene.js";
+import {
+  runHexDump, runStringsExtract, runPNGChunks,
+  runFileCarver, runMetadataExtract,
+} from "./forensics.js";
+import {
+  identifyHash,
+  runXORAnalyze, runXORWithKey,
+  runCaesar, runCaesarBrute,
+  runVigenere, runAtbash,
+  runRailFence, runFrequencyAnalysis, runROT13,
+} from "./ctf_tools.js";
 
 // ─── RSA Panel State ──────────────────────────────────────────
 const RSA_MIN = 2,
@@ -496,6 +511,27 @@ Object.assign(window, {
   decodeAudioMessage,
   playAndVisualize,
   exportWAV,
+  stopAudio,
+  analyzeWAVMetadata,
+  drawLSBBitmap,
+  analyzeStereoChannels,
+
+  // forensics
+  runHexDump,
+  runStringsExtract,
+  runPNGChunks,
+  runFileCarver,
+  runMetadataExtract,
+
+  // ctf tools
+  identifyHash,
+  runXORAnalyze,
+  runXORWithKey,
+  runCaesar, runCaesarBrute,
+  runVigenere, runAtbash,
+  runRailFence,
+  runFrequencyAnalysis,
+  runROT13,
 
   // crypto / AES
   setAESMode,
