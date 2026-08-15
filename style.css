@@ -56,6 +56,32 @@
 
 html {
   scroll-behavior: smooth;
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 166, 35, 0.28) transparent;
+}
+
+/* ── Global custom scrollbar (WebKit) ────────────────────── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 166, 35, 0.22);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 166, 35, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 body {
@@ -281,32 +307,41 @@ header {
   top: 50%;
   transform: translateY(-50%);
   left: var(--sidebar-w);
-  z-index: 300;
-  width: 18px;
-  height: 52px;
-  background: rgba(13, 13, 26, 0.92);
+  z-index: 302;
+  width: 20px;
+  height: 56px;
+  background: rgba(13, 13, 26, 0.95);
   border: 1px solid var(--border2);
   border-left: none;
-  border-radius: 0 10px 10px 0;
+  border-radius: 0 12px 12px 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text3);
-  font-size: 10px;
-  backdrop-filter: blur(16px);
+  font-size: 11px;
+  backdrop-filter: blur(20px);
   transition:
     left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     color 0.2s,
     background 0.2s,
-    border-color 0.2s;
+    border-color 0.2s,
+    box-shadow 0.2s;
   user-select: none;
+  /* Subtle amber glow on the right edge */
+  box-shadow:
+    2px 0 12px rgba(0, 0, 0, 0.4),
+    inset -1px 0 0 rgba(245, 166, 35, 0.08);
 }
 
 .sidebar-toggle:hover {
   color: var(--amber);
-  background: rgba(245, 166, 35, 0.1);
-  border-color: rgba(245, 166, 35, 0.35);
+  background: rgba(245, 166, 35, 0.12);
+  border-color: rgba(245, 166, 35, 0.4);
+  box-shadow:
+    2px 0 16px rgba(0, 0, 0, 0.4),
+    0 0 12px rgba(245, 166, 35, 0.15),
+    inset -1px 0 0 rgba(245, 166, 35, 0.2);
 }
 
 .sidebar-toggle.collapsed {
@@ -316,6 +351,9 @@ header {
 .sidebar-toggle .toggle-arrow {
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
+  font-style: normal;
+  /* Use a more visible chevron */
+  font-size: 13px;
 }
 
 .sidebar-toggle.collapsed .toggle-arrow {
@@ -328,7 +366,7 @@ header {
 .sidebar {
   width: var(--sidebar-w);
   flex-shrink: 0;
-  padding: 28px 0;
+  padding: 20px 0 48px; /* extra bottom padding so last items aren't hidden behind fade */
   background: rgba(7, 7, 15, 0.55);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -344,6 +382,38 @@ header {
   transition:
     width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     border-color 0.35s;
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(245, 166, 35, 0.35) transparent;
+  /* CSS-only scroll-shadow: shows amber glow only when content overflows */
+  background-image:
+    linear-gradient(rgba(7, 7, 15, 0.55) 30%, transparent),
+    linear-gradient(transparent, rgba(7, 7, 15, 0.9) 70%),
+    radial-gradient(ellipse at top, rgba(245, 166, 35, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse at bottom, rgba(245, 166, 35, 0.15) 0%, transparent 70%);
+  background-position: top, bottom, top, bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 32px, 100% 52px, 100% 20px, 100% 20px;
+  background-attachment: local, local, scroll, scroll;
+}
+
+/* Sidebar amber scrollbar (WebKit) */
+.sidebar::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(245, 166, 35, 0.4);
+  border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 166, 35, 0.7);
 }
 
 .sidebar.collapsed {
@@ -365,28 +435,28 @@ header {
   text-transform: uppercase;
   color: var(--text3);
   padding: 0 24px;
-  margin-bottom: 6px;
-  margin-top: 22px;
+  margin-bottom: 4px;
+  margin-top: 18px;
 }
 
 .nav-section-label:first-child {
-  margin-top: 0;
+  margin-top: 4px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 24px;
+  padding: 8px 24px;
   cursor: pointer;
   transition: all 0.2s;
   border-left: 2px solid transparent;
   border-right: 2px solid transparent;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 400;
   color: var(--text2);
   user-select: none;
-  margin: 2px 0;
+  margin: 1px 0;
   white-space: nowrap;
 }
 
@@ -1055,17 +1125,13 @@ select option {
   color: var(--sage);
 }
 
+/* Terminal scrollbar — inherits global but slightly dimmer */
 .terminal::-webkit-scrollbar {
   width: 3px;
 }
 
-.terminal::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 .terminal::-webkit-scrollbar-thumb {
-  background: var(--border2);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .t-line {
@@ -1463,6 +1529,17 @@ select option {
   min-height: 70px;
   max-height: 140px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.3) transparent;
+}
+
+.rsa-key-display::-webkit-scrollbar {
+  width: 3px;
+}
+
+.rsa-key-display::-webkit-scrollbar-thumb {
+  background: rgba(167, 139, 250, 0.35);
+  border-radius: 2px;
 }
 
 .rsa-prime-badge {
