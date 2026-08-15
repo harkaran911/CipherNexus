@@ -242,12 +242,12 @@
                 <div class="field">
                   <label>LSB Depth (bits per channel)
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">LSB Depth</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> How much data is hidden in each pixel's color values. More depth = more room, but more visible changes.</div>
                         <div class="tooltip-complete"><b>Complete:</b> LSB embedding modifies the least important bits of pixel color channels. Higher depth increases payload capacity exponentially but introduces statistical and visual anomalies that forensic tools can detect.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Depth Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Depth Explanation</button>
                       </div>
                     </span>
                   </label>
@@ -319,12 +319,12 @@
                 <div class="field">
                   <label>Passphrase (XOR key)
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">XOR Key</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> A secret password mixed with your message to scramble it before hiding.</div>
                         <div class="tooltip-complete"><b>Complete:</b> Performs a bitwise exclusive-OR (XOR) operation between the secret message and the passphrase. This encrypts the payload before it gets embedded, providing defense-in-depth if the steganography is detected.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                       </div>
                     </span>
                   </label>
@@ -527,12 +527,12 @@
                 <div>
                   <div class="card-title-text" style="display: flex; align-items: center;">Chi-Square Statistical Test
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">Chi-Square Analysis</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> A math test that looks for unnatural patterns in image colors to spot hidden data.</div>
                         <div class="tooltip-complete"><b>Complete:</b> Detects LSB steganography by comparing observed vs. expected frequencies of pixel values. LSB embedding equalizes adjacent color frequencies, which spikes the Chi-Square anomaly metric.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                       </div>
                     </span>
                   </div>
@@ -570,12 +570,12 @@
                   <div class="card-title-text" style="display: flex; align-items: center;">
                     RS (Regular-Singular) Analysis
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">RS Analysis</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> Checks if chunks of pixels are unusually "messy" in a way that suggests data was hidden there.</div>
                         <div class="tooltip-complete"><b>Complete:</b> Classifies pixel groups based on their smoothness. LSB modification disrupts the natural ratio of regular to singular groups, causing positive and negative group counts to converge—a reliable signature of stego content.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                       </div>
                     </span>
                   </div>
@@ -685,12 +685,12 @@
                 <div>
                   <div class="card-title-text" style="display: flex; align-items: center;">Sample Pairs Analysis (SPA)
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">Sample Pairs</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> Looks at how often certain pairs of colors sit next to each other to figure out exactly how much data is hidden.</div>
                         <div class="tooltip-complete"><b>Complete:</b> Models the effects of LSB embedding by analyzing structural shifts in adjacent pixel value differences, accurately estimating the exact length of the embedded secret message.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                       </div>
                     </span>
                   </div>
@@ -1151,6 +1151,8 @@
                   <div class="upload-subtext" id="audioStatus">No audio loaded</div>
                 </div>
 
+                <div class="terminal" id="audioLog" style="display:none;"></div>
+
                 <div class="field">
                   <label>Secret Message</label>
                   <textarea
@@ -1176,12 +1178,12 @@
                   <div>
                     <div class="card-title-text" style="display: flex; align-items: center;">Spectrogram Forensics
                       <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                        <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                        <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                         <div class="info-tooltip">
                           <span class="tooltip-label">Audio Forensics</span>
                           <div class="tooltip-simplified"><b>Simplified:</b> A visual map of sound. Hiding data makes the map look fuzzy at the top (high pitch).</div>
                           <div class="tooltip-complete"><b>Complete:</b> Transforming time-domain audio to frequency-domain via FFT reveals the broadband high-frequency quantization noise introduced when replacing LSBs with pseudo-random encrypted payloads.</div>
-                          <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                          <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                         </div>
                       </span>
                     </div>
@@ -1857,12 +1859,12 @@ CipherNexus v3</textarea
                     >Initialization Vector (IV / Nonce)</span
                   >
                   <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                    <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                    <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                     <div class="info-tooltip">
                       <span class="tooltip-label">IV / Nonce</span>
                       <div class="tooltip-simplified"><b>Simplified:</b> A random starting number so that encrypting the same message twice looks completely different both times.</div>
                       <div class="tooltip-complete"><b>Complete:</b> A nonce injected into the first block of the cipher operation. Reusing an IV with the same key breaks semantic security, allowing attackers to XOR ciphertexts together to recover plaintexts.</div>
-                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                     </div>
                   </span>
                   </label
@@ -2126,12 +2128,12 @@ CONFIDENTIAL: Project Files — Access Restricted to Clearance Level 5</textarea
               <div class="field">
                 <label>Public Exponent e (coprime with φ(n))
                   <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                    <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                    <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                     <div class="info-tooltip">
                       <span class="tooltip-label">Public Exponent</span>
                       <div class="tooltip-simplified"><b>Simplified:</b> The number used to lock the message. It's usually 65537 because it's mathematically safe and fast.</div>
                       <div class="tooltip-complete"><b>Complete:</b> In RSA, e must be coprime to φ(n). 65537 (2^16+1) is used almost universally because its binary representation enables extremely fast exponentiation while resisting small-exponent attacks.</div>
-                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                      <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                     </div>
                   </span>
                 </label>
@@ -2385,12 +2387,12 @@ CONFIDENTIAL: Project Files — Access Restricted to Clearance Level 5</textarea
                 <div>
                   <div class="card-title-text" style="display: flex; align-items: center;">Key Derivation — PBKDF2
                     <span class="info-tooltip-wrap" onclick="if(event)event.preventDefault()">
-                      <button class="info-btn" onclick="toggleTooltipMode(this)">?</button>
+                      <button class="info-btn" onclick="toggleTooltipMode(this, event)">?</button>
                       <div class="info-tooltip">
                         <span class="tooltip-label">PBKDF2</span>
                         <div class="tooltip-simplified"><b>Simplified:</b> A recipe that purposefully slows down password checking to stop hackers from guessing millions of passwords a second.</div>
                         <div class="tooltip-complete"><b>Complete:</b> Applies a pseudorandom function (HMAC) to the passphrase and salt, iterating hundreds of thousands of times. This "key stretching" penalizes brute-force attacks by making each guess computationally expensive.</div>
-                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this)">Toggle Explanation</button>
+                        <button class="tooltip-toggle" onclick="toggleTooltipMode(this, event)">Toggle Explanation</button>
                       </div>
                     </span>
                   </div>
@@ -2956,10 +2958,10 @@ The quick brown fox jumps over the lazy dog. 1234567890!</textarea
 
     <!-- Tooltip Logic -->
     <script>
-      window.toggleTooltipMode = function(element) {
-        if (event) {
-          event.preventDefault();
-          event.stopPropagation();
+      window.toggleTooltipMode = function(element, evt) {
+        if (evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
         }
         const wrap = element.closest('.info-tooltip-wrap');
         if (!wrap) return;

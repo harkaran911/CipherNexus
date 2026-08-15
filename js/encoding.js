@@ -140,9 +140,10 @@ export function handleEncodingSync(sourceId) {
         }
     };
 
-    if (!valid && b64El.value.trim() !== "" && hexEl.value.trim() !== "" && binEl.value.trim() !== "") {
-        // If the source was invalid and non-empty, mark target plain as errored visually
+    const sourceEl = document.getElementById(sourceId);
+    if (!valid && sourceEl && sourceEl.value.trim() !== "") {
         if (sourceId !== "encPlain") {
+            setErrorState(sourceEl, true);
             setErrorState(plainEl, true);
         }
         return;

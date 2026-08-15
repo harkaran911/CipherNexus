@@ -1,5 +1,5 @@
 /**
- * app.js — StegoVault v3 Application Entry Point
+ * app.js — CipherNexus v3 Application Entry Point
  * Imports all modules, wires DOM events, initialises UI,
  * handles RSA panel, entropy visualizer, password analyzer.
  * This is the ONLY file that touches window / global scope.
@@ -563,7 +563,7 @@ function runBootSequence() {
     setTimeout(() => {
       const el = document.createElement("div");
       el.className = "term-line " + line.class;
-      el.innerText = "> " + line.text;
+      el.textContent = "> " + line.text;
       terminalOut.appendChild(el);
       terminalOut.scrollTop = terminalOut.scrollHeight;
     }, cumulativeDelay);

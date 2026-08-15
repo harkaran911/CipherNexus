@@ -1,5 +1,5 @@
 /**
- * security.js — StegoVault v3 Security Utility Layer
+ * security.js — CipherNexus v3 Security Utility Layer
  * All XSS prevention, input validation, file validation,
  * safe DOM helpers, localStorage guards, clipboard safety.
  * No external dependencies. Must be loaded FIRST.
@@ -136,7 +136,7 @@ export function validateImageDimensions(img, maxDim = 20000) {
 }
 
 // ─── DOM Terminal Helpers ─────────────────────────────────────
-const SAFE_LOG_CLS = new Set(["", "err", "warn", "info", "muted"]);
+const SAFE_LOG_CLS = new Set(["", "err", "warn", "info", "muted", "safe"]);
 
 /**
  * Appends a styled line to a terminal div using textContent.
@@ -268,7 +268,7 @@ export function printSecurityAudit() {
     "No eval(), no new Function(), no setTimeout(string)",
   ];
   console.groupCollapsed(
-    "%c StegoVault v3 — Security Controls",
+    "%c CipherNexus v3 — Security Controls",
     "color:#f5a623;font-weight:bold;font-size:13px",
   );
   controls.forEach((c, i) =>
